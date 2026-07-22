@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hakha AI">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>">
+    
+    <!-- PWA Manifest (inline) -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhha2hhIEFJIEFzc2lzdGFudCIsCiAgInNob3J0X25hbWUiOiAiSGFraGEgQUkiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBmMTcyYSIsCiAgInRoZW1lX2NvbG9yIjogIiMzYjgyZjYiLAogICJpY29ucyI6IFtdCn0=">
+    
+    <title>Hakha AI Assistant</title>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Create inline service worker
+                const swCode = `
+                    const CACHE = 'hakha-v1';
+                    self.addEventListener('install', e => {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('fetch', e => {
+                        e.respondWith(
+                            caches.match(e.request).then(r => r || fetch(e.request))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl);
+            });
+        }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Header */
+        .header {
+            background: #1e293b;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        .header .logo { font-size: 26px; }
+        .header h1 { font-size: 17px; font-weight: 600; }
+        .header .badge { 
+            background: #10b981; color: white; font-size: 10px;
+            padding: 2px 8px; border-radius: 10px; margin-left: 6px;
+        }
+
+        /* Mode Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            overflow-x: auto;
+            flex-shrink: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab {
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            white-space: nowrap;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .tab:active { transform: scale(0.95); }
+        .tab.active { background: #3b82f6; color: white; }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .message {
+            display: flex;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { flex-direction: row-reverse; }
+        
+        .avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .message.user .avatar { background: #3b82f6; }
+        .message.assistant .avatar { background: #10b981; }
+        
+        .bubble {
+            background: #1e293b;
+            padding: 10px 14px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 14px;
+            max-width: 85%;
+            word-break: break-word;
+        }
+        .message.user .bubble { background: #3b82f6; border-bottom-right-radius: 4px; }
+        .message.assistant .bubble { background: #1e293b; border: 1px solid #334155; border-bottom-left-radius: 4px; }
+
+        /* Input Area */
+        .input-area {
+            padding: 10px 14px;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .input-area textarea {
+            flex: 1;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: #e2e8f0;
+            font-size: 15px;
+            resize: none;
+            max-height: 100px;
+            outline: none;
+            font-family: inherit;
+        }
+        .input-area textarea:focus { border-color: #3b82f6; }
+        
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .btn:active { transform: scale(0.9); }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:disabled { opacity: 0.4; }
+        .btn-icon { background: #334155; color: #94a3b8; }
+
+        /* Typing Dots */
+        .typing { display: flex; gap: 3px; padding: 4px 0; }
+        .typing span {
+            width: 7px; height: 7px;
+            background: #64748b; border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* Install Prompt */
+        .install-banner {
+            display: none;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Safe Area for iPhones */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .input-area { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner" onclick="installApp()">
+        📲 Tap to install the Hakha AI app
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <span class="logo">🗣️</span>
+        <h1>Hakha AI</h1>
+        <span class="badge">Beta</span>
+    </div>
+
+    <!-- Mode Tabs -->
+    <div class="tabs">
+        <div class="tab active" data-mode="chat">💬 Chat</div>
+        <div class="tab" data-mode="translate">🔄 Translate</div>
+        <div class="tab" data-mode="dictionary">📖 Dictionary</div>
+        <div class="tab" data-mode="grammar">📝 Grammar</div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-container" id="chatContainer">
+        <div class="message assistant">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                <strong>Hello! Na dam maw?</strong><br><br>
+                I'm your Hakha AI Assistant. I can:<br>
+                🔄 Translate between Hakha, English & more<br>
+                📖 Explain Hakha words and phrases<br>
+                📝 Help with Hakha grammar<br>
+                💬 Chat in Hakha<br><br>
+                <em>Zei thil dah ka tuahpiak khawh?</em>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+        <button class="btn btn-icon" onclick="document.getElementById('fileInput').click()">📎</button>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)">
+        <textarea id="userInput" rows="1" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+        <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+
+    <script>
+        // ========================================================================
+        // PWA INSTALL
+        // ========================================================================
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'block';
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    document.getElementById('installBanner').style.display = 'none';
+                });
+            }
+        }
+
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installBanner').style.display = 'none';
+        });
+
+        // ========================================================================
+        // APP LOGIC
+        // ========================================================================
+        const API_URL = "https://your-api.com/generate";  // ← Change this
+        let currentMode = 'chat';
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentMode = tab.dataset.mode;
+            });
+        });
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('userInput').value = `[Image attached: ${file.name}]`;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+
+            const typingDiv = addTypingIndicator();
+
+            try {
+                const response = await callAPI(message);
+                removeTypingIndicator(typingDiv);
+                addMessage('assistant', response);
+            } catch (error) {
+                removeTypingIndicator(typingDiv);
+                addMessage('assistant', '⚠️ Connection error. Try again.');
+            }
+        }
+
+        async function callAPI(text) {
+            // ---- Replace with your API ----
+            await new Promise(r => setTimeout(r, 1500));
+            const mock = {
+                'chat': 'Ka dam! Zei thil dah ka tuahpiak khawh?',
+                'translate': 'Chawdawr ah ka kal lai',
+                'dictionary': "'ṭha' = good/nice. Example: Ni a ṭha.",
+                'grammar': "'ṭha' is an adjective meaning good."
+            };
+            return mock[currentMode] || 'Ka dam!';
+        }
+
+        function addMessage(role, content) {
+            const container = document.getElementById('chatContainer');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = `
+                <div class="avatar">${role === 'user' ? '👤' : '🤖'}</div>
+                <div class="bubble">${content.replace(/\n/g, '<br>')}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const container = document.getElementById('chatContainer');
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = 'typingIndicator';
+            div.innerHTML = `
+                <div class="avatar">🤖</div>
+                <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div;
+        }
+
+        function removeTypingIndicator(div) { if (div) div.remove(); }
+    </script>
+</body>
+</html>
