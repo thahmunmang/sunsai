@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunsai AI Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; }
+    .sidebar { background-color: #131314; width: 260px; }
+    .chat-container { background-color: #0e0e10; }
+    .input-box { background-color: #1e1f20; border-radius: 28px; }
+    pre code { border-radius: 8px; font-family: 'Consolas', monospace; }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar flex flex-col justify-between p-3 border-r border-gray-800">
+    <div>
+      <div class="flex items-center gap-3 px-3 py-2">
+        <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
+        <span class="font-bold text-lg tracking-wide text-white">Sunsai</span>
+      </div>
+      <button onclick="newChat()" class="mt-4 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-4 py-3 rounded-full text-sm font-medium transition">
+        <i class="fa-solid fa-plus"></i> New chat
+      </button>
+      <div class="mt-6 text-xs text-gray-500 font-semibold px-3 uppercase tracking-wider">Recent</div>
+      <ul id="history-list" class="mt-2 space-y-1 text-sm text-gray-400">
+        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
+      </ul>
+    </div>
+    <div class="border-t border-gray-800 pt-3">
+      <div class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="flex-1 flex flex-col justify-between h-full relative">
+    <!-- Header Bar -->
+    <header class="flex items-center justify-between px-6 py-3 border-b border-gray-800">
+      <div class="flex items-center gap-2 text-sm font-medium text-gray-300">
+        <span>Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+      </div>
+      <button class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-bolt"></i> Upgrade
+      </button>
+    </header>
+
+    <!-- Chat Stream Output -->
+    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full">
+      <!-- Messages inject dynamically here -->
+    </div>
+
+    <!-- Input Bar -->
+    <div class="p-4 max-w-4xl mx-auto w-full">
+      <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50">
+        <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>
+        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm" onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+      <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
+    </div>
+  </main>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chatStream = document.getElementById("chat-stream");
+      
+      // Append User Bubble
+      chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm">${message}</div></div>`;
+      input.value = "";
+
+      // Append Assistant Container
+      const responseDiv = document.createElement("div");
+      responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed";
+      responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1"></div>`;
+      chatStream.appendChild(responseDiv);
+
+      const contentBox = responseDiv.querySelector(".content");
+
+      // Fetch streaming response
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let rawText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter(Boolean);
+        for (let line of lines) {
+          const parsed = JSON.parse(line);
+          rawText += parsed.text;
+          contentBox.innerHTML = marked.parse(rawText);
+          hljs.highlightAll();
+        }
+      }
+    }
+
+    function newChat() {
+      document.getElementById("chat-stream").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
