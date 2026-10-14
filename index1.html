@@ -45,10 +45,7 @@
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col justify-between h-full relative">
     <!-- Header Bar -->
-    <header class="flex items-center justify-between px-6 py-3 border-b border-gray-800">
-      <div class="flex items-center gap-2 text-sm font-medium text-gray-300">
-        <span>Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-      </div>
+    <header class="flex items-center justify-between px-6 py-3">
       <button class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-semibold flex items-center gap-2">
         <i class="fa-solid fa-bolt"></i> Upgrade
       </button>
@@ -64,6 +61,9 @@
       <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50">
         <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>
         <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm" onkeydown="if(event.key==='Enter') sendMessage()">
+            <div class="flex items-center gap-2 text-sm font-medium text-gray-300">
+              <span>Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+            </div>
         <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
       <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
