@@ -10,8 +10,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; user-select: none; }
-    .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
+    body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; user-select: none; transition: background-color 0.3s ease, color 0.3s ease; }
+    .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
     .sidebar.collapsed { width: 64px; padding: 12px 6px !important; }
     .sidebar.collapsed .hide-on-collapse { display: none !important; }
     .sidebar.collapsed .show-on-collapse { display: flex !important; }
@@ -22,9 +22,22 @@
     .input-box { background-color: #1e1f20; border-radius: 28px; }
     pre code { border-radius: 8px; font-family: 'Consolas', monospace; }
     
+    /* Theme Bright Mode Classes */
+    body.theme-bright { background-color: #f4f5f7 !important; color: #18181b !important; }
+    body.theme-bright .sidebar { background-color: #ffffff !important; border-color: #e4e4e7 !important; }
+    body.theme-bright .input-box { background-color: #ffffff !important; border-color: #d4d4d8 !important; }
+    body.theme-bright .input-box input { color: #18181b !important; }
+    body.theme-bright .input-box input::placeholder { color: #a1a1aa !important; }
+    body.theme-bright .bg-\[\#18181b\] { background-color: #ffffff !important; }
+    body.theme-bright .bg-\[\#1a1a1c\], body.theme-bright .bg-\[\#1e1f20\], body.theme-bright .bg-\[\#202124\], body.theme-bright .bg-\[\#27272a\], body.theme-bright .bg-\[\#282a2c\] { background-color: #f4f4f5 !important; }
+    body.theme-bright .text-white { color: #18181b !important; }
+    body.theme-bright .text-gray-200, body.theme-bright .text-gray-300, body.theme-bright .text-gray-400 { color: #3f3f46 !important; }
+    body.theme-bright .border-gray-800, body.theme-bright .border-gray-700, body.theme-bright .border-gray-700\/50 { border-color: #e4e4e7 !important; }
+    
     /* Custom Scrollbar for Sidebar */
     .sidebar-scroll::-webkit-scrollbar { width: 4px; }
     .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2b2d; border-radius: 4px; }
+    body.theme-bright .sidebar-scroll::-webkit-scrollbar-thumb { background: #d4d4d8; }
     
     /* Tooltip styling - visible when collapsed next to icons */
     .tooltip-container { position: relative; }
@@ -72,6 +85,13 @@
 </head>
 <body class="flex h-screen overflow-hidden relative">
 
+  <!-- MODALS CONTAINER -->
+  <div id="modal-container" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="modal-content" class="bg-[#18181b] border border-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+      <!-- Dynamic Content Loaded Here -->
+    </div>
+  </div>
+
   <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
     <div id="sidebar-inner" class="flex flex-col h-full overflow-hidden">
       
@@ -103,38 +123,38 @@
       <!-- New Chat Button (No permanent highlight) -->
       <button onclick="newChat()" class="tooltip-container my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
         <i class="fa-solid fa-plus w-5 text-center text-sm"></i> 
-        <span class="hide-on-collapse">New chat</span>
-        <div class="tooltip-label">New chat</div>
+        <span id="txt-new-chat" class="hide-on-collapse">New chat</span>
+        <div class="tooltip-label" id="tt-new-chat">New chat</div>
       </button>
 
       <!-- Nav Items -->
       <div class="space-y-1 shrink-0">
         <div id="nav-Library" onclick="switchNav('Library')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
           <i class="fa-solid fa-folder-open w-5 text-center"></i> 
-          <span class="hide-on-collapse">Library</span>
-          <div class="tooltip-label">Library</div>
+          <span id="txt-nav-library" class="hide-on-collapse">Library</span>
+          <div class="tooltip-label" id="tt-nav-library">Library</div>
         </div>
         <div id="nav-Images" onclick="switchNav('Images')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
           <i class="fa-solid fa-image w-5 text-center"></i> 
-          <span class="hide-on-collapse">Images</span>
-          <div class="tooltip-label">Images</div>
+          <span id="txt-nav-images" class="hide-on-collapse">Images</span>
+          <div class="tooltip-label" id="tt-nav-images">Images</div>
         </div>
         <div id="nav-Audio" onclick="switchNav('Audio')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
           <i class="fa-solid fa-headphones w-5 text-center"></i> 
-          <span class="hide-on-collapse">Audio</span>
-          <div class="tooltip-label">Audio</div>
+          <span id="txt-nav-audio" class="hide-on-collapse">Audio</span>
+          <div class="tooltip-label" id="tt-nav-audio">Audio</div>
         </div>
         <div id="nav-Video" onclick="switchNav('Video')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
           <i class="fa-solid fa-video w-5 text-center"></i> 
-          <span class="hide-on-collapse">Video</span>
-          <div class="tooltip-label">Video</div>
+          <span id="txt-nav-video" class="hide-on-collapse">Video</span>
+          <div class="tooltip-label" id="tt-nav-video">Video</div>
         </div>
       </div>
 
       <!-- Search Chats Section -->
       <div class="mt-3 hide-on-collapse">
         <div class="flex items-center justify-between px-2 mb-1">
-          <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Search Chats</span>
+          <span id="txt-search-title" class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Search Chats</span>
           <button onclick="toggleSearch()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
         <div id="search-box-container" class="hidden px-0.5 mt-1">
@@ -146,18 +166,18 @@
       <div class="mt-3 flex items-center justify-between px-2 hide-on-collapse shrink-0">
         <div class="flex items-center gap-2">
           <i class="fa-regular fa-clock text-xs text-blue-400"></i>
-          <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Recent</span>
+          <span id="txt-recent-title" class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Recent</span>
         </div>
         <span id="chat-count-badge" class="text-[10px] bg-[#1e1f20] text-gray-400 px-1.5 py-0.5 rounded-full font-mono">100</span>
       </div>
       
-      <!-- Recent Icon when Sidebar is OFF (with Selectable Tooltip containing 100 recent chat list) -->
+      <!-- Recent Icon when Sidebar is OFF -->
       <div class="recent-tooltip-wrapper show-on-collapse relative items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight tooltip-container">
         <i class="fa-regular fa-clock text-base"></i>
-        <div class="tooltip-label">Recent Chats</div>
+        <div class="tooltip-label" id="tt-recent-chats">Recent Chats</div>
         <div id="recent-tooltip-box" class="space-y-1">
           <div class="text-xs font-semibold text-blue-400 px-2 py-1 border-b border-gray-800 flex justify-between items-center">
-            <span>Recent Chats</span>
+            <span id="txt-tt-recent">Recent Chats</span>
             <span class="bg-[#27272a] text-[10px] px-1.5 py-0.5 rounded text-gray-300">100 items</span>
           </div>
           <div id="tooltip-history-list" class="space-y-0.5 max-h-60 overflow-y-auto sidebar-scroll">
@@ -175,23 +195,23 @@
     </div>
 
       <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
-        <div id="nav-Settings" onclick="switchNav('Settings')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
-          <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
-          <span class="hide-on-collapse">Settings</span>
-          <div class="tooltip-label">Settings</div>
-        </div>
-        <div id="nav-Profile" onclick="switchNav('Profile')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
-          <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-125"></i>
-          <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
-          <div class="tooltip-label">Tha Hmun Mang</div>
-        </div>
+      <div id="nav-Settings" onclick="switchNav('Settings')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+        <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
+        <span id="txt-nav-settings" class="hide-on-collapse">Settings</span>
+        <div class="tooltip-label" id="tt-nav-settings">Settings</div>
       </div>
-    </aside>
+      <div id="nav-Profile" onclick="switchNav('Profile')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+        <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-125"></i>
+        <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
+        <div class="tooltip-label">Tha Hmun Mang</div>
+      </div>
+    </div>
+  </aside>
 
-  <main class="flex-1 flex flex-col justify-between h-full relative">
+  <main id="main-content" class="flex-1 flex flex-col justify-between h-full relative overflow-hidden">
     
-    <!-- Top Right Options -->
-    <div class="absolute top-4 right-6 z-10">
+    <!-- Top Right Options (Three Dots) -->
+    <div id="top-options-menu" class="absolute top-4 right-6 z-10">
       <button onclick="toggleOptionsMenu(event)" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-[#1e1f20] transition">
         <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
       </button>
@@ -201,51 +221,54 @@
       </div>
     </div>
 
-    <!-- Chat Output Stream -->
-    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12 select-text">
-      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
-        <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-        <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today? Select from 100+ starter prompts or history sessions below.</div>
-      </div>
-    </div>
-
-    <!-- Input Section -->
-    <div class="p-4 max-w-4xl mx-auto w-full">
-      <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
-        
-        <div id="attachment-menu" class="hidden absolute bottom-14 left-0 w-52 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-2 text-sm text-gray-300">
-          <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
-            <i class="fa-solid fa-image text-blue-400"></i> Upload Image <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-          </label>
-          <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
-            <i class="fa-solid fa-file-lines text-green-400"></i> Upload Document <input type="file" class="hidden" onchange="handleFileSelect(event)">
-          </label>
+    <!-- Main View Container (Swappable between Chat and Settings/Other views) -->
+    <div id="view-container" class="flex-1 flex flex-col justify-between h-full overflow-hidden">
+      <!-- Chat Output Stream -->
+      <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12 select-text">
+        <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+          <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today? Select from 100+ starter prompts or history sessions below.</div>
         </div>
+      </div>
 
-        <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
-        
-        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" oninput="handleInputChange()" onkeydown="if(event.key==='Enter') sendMessage()">
-        
-        <!-- Microphone Voice Input Button -->
-        <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition px-1" title="Voice Input">
-          <i class="fa-solid fa-microphone text-base"></i>
-        </button>
-
-        <div class="relative">
-          <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
-            <span id="selected-model">Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
-          </button>
-          <div id="model-dropdown" class="hidden absolute right-0 bottom-8 w-36 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-xs text-gray-300">
-            <div onclick="selectModel('Super')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Super</div>
-            <div onclick="selectModel('Normal')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Normal</div>
-            <div onclick="selectModel('Free')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Free</div>
+      <!-- Input Section -->
+      <div class="p-4 max-w-4xl mx-auto w-full">
+        <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
+          
+          <div id="attachment-menu" class="hidden absolute bottom-14 left-0 w-52 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-2 text-sm text-gray-300">
+            <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+              <i class="fa-solid fa-image text-blue-400"></i> Upload Image <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+            </label>
+            <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+              <i class="fa-solid fa-file-lines text-green-400"></i> Upload Document <input type="file" class="hidden" onchange="handleFileSelect(event)">
+            </label>
           </div>
-        </div>
 
-        <!-- Send Button (Hidden when input is blank, shown when not blank) -->
-        <button id="send-btn" onclick="sendMessage()" class="hidden text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
+          <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
+          
+          <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" oninput="handleInputChange()" onkeydown="if(event.key==='Enter') sendMessage()">
+          
+          <!-- Microphone Voice Input Button -->
+          <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition px-1" title="Voice Input">
+            <i class="fa-solid fa-microphone text-base"></i>
+          </button>
+
+          <div class="relative">
+            <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
+              <span id="selected-model">Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+            </button>
+            <div id="model-dropdown" class="hidden absolute right-0 bottom-8 w-36 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-xs text-gray-300">
+              <div onclick="selectModel('Super')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Super</div>
+              <div onclick="selectModel('Normal')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Normal</div>
+              <div onclick="selectModel('Free')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Free</div>
+            </div>
+          </div>
+
+          <!-- Send Button -->
+          <button id="send-btn" onclick="sendMessage()" class="hidden text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
+        </div>
+        <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
       </div>
-      <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
     </div>
   </main>
 
@@ -261,6 +284,206 @@
       "Redis Caching Strategies", "Async IO in Python"
     ];
 
+    // Language Dictionary Translations
+    const i18n = {
+      en: {
+        newChat: "New chat",
+        library: "Library",
+        images: "Images",
+        audio: "Audio",
+        video: "Video",
+        settings: "Settings",
+        searchChats: "Search Chats",
+        recent: "Recent",
+        askPlaceholder: "Ask Sunsai...",
+        settingsHeader: "Settings",
+        settingsDesc: "Manage your Sunsai account settings, preferences, models and privacy data.",
+        saveChanges: "Save Changes",
+        prefTitle: "Preferences",
+        appLanguage: "1. App Language",
+        appLangDesc: "Select interface language for menus and responses.",
+        themeTitle: "2. Appearance Theme",
+        themeDesc: "Choose your visual color theme mode.",
+        system: "System",
+        dark: "Dark",
+        bright: "Bright"
+      },
+      hak: {
+        newChat: "Holh Onhar Thar",
+        library: "Phunzaang",
+        images: "Hmanthlak",
+        audio: "Aaw",
+        video: "Giawm",
+        settings: "Khinfaang",
+        searchChats: "Holh Kawlnak",
+        recent: "Naihcha",
+        askPlaceholder: "Sunsai hnenah hal...",
+        settingsHeader: "Khinfaang Pawl",
+        settingsDesc: "Akaung le khinfaang cawlcanghnak pawl zohzafiannak.",
+        saveChanges: "Khomh-naak",
+        prefTitle: "Duh-channing",
+        appLanguage: "1. Holh Hman ding",
+        appLangDesc: "Cazaan le ca-aaw hna holh teimaknak.",
+        themeTitle: "2. Suangning le Mui",
+        themeDesc: "Sikung zaang le muihnak pehnak.",
+        system: "Rualchawn",
+        dark: "Muidi",
+        bright: "Aai-ceang"
+      },
+      ted: {
+        newChat: "Holh Thar",
+        library: "Lai Mual",
+        images: "Lim",
+        audio: "Aw",
+        video: "Video",
+        settings: "Siahsatna",
+        searchChats: "Kanan Hawina",
+        recent: "Taikhang",
+        askPlaceholder: "Sunsai kiangah dongh in...",
+        settingsHeader: "Siahsatnate",
+        settingsDesc: "Akaung leh siahsatnate zetsuakna.",
+        saveChanges: "Kem In",
+        prefTitle: "Deihsakna",
+        appLanguage: "1. Pauk Zangh Ding",
+        appLangDesc: "Mai hiang leh pauk manhnak teelkawmna.",
+        themeTitle: "2. Muhna Limeel",
+        themeDesc: "Aksap leh limeel melmual zangh ding.",
+        system: "Sistem",
+        dark: "Muinak",
+        bright: "Tangna"
+      },
+      fal: {
+        newChat: "Biatak Thar",
+        library: "Laibur",
+        images: "Hringtu",
+        audio: "Aw",
+        video: "Video",
+        settings: "Remruatnak",
+        searchChats: "Biaknak Kawlnak",
+        recent: "Tulai",
+        askPlaceholder: "Sunsai hrangah hal...",
+        settingsHeader: "Remruatnak Pawl",
+        settingsDesc: "Akaung le remruatnakpawl remruatnak.",
+        saveChanges: "Vong In",
+        prefTitle: "Duhruatnak",
+        appLanguage: "1. Holh Zang ding",
+        appLangDesc: "Muinak le holhhnehte teelruatnak.",
+        themeTitle: "2. Zohruatnak Mui",
+        themeDesc: "Sikung zaang le muihnak teelruatnak.",
+        system: "Sistem",
+        dark: "Muidi",
+        bright: "Var-zaang"
+      },
+      mzo: {
+        newChat: "Titi Thar",
+        library: "Lehkhabu Khawl",
+        images: "Thlalak",
+        audio: "Ri",
+        video: "Video",
+        settings: "Ruahmanhna",
+        searchChats: "Titi Zawnna",
+        recent: "Tuna Vawi",
+        askPlaceholder: "Sunsai zawt rawh...",
+        settingsHeader: "Ruahmanhnate",
+        settingsDesc: "Aakaunt ruahmanhna leh thlan tawhte endikna.",
+        saveChanges: "Vawng Tlat",
+        prefTitle: "Duhthlanhnate",
+        appLanguage: "1. Tawng Hman Tur",
+        appLangDesc: "Hman duh tawng leh chhanna te thlang rawh.",
+        themeTitle: "2. Lan Dan Model",
+        themeDesc: "Rawng leh lan dan duh zawk thlang rawh.",
+        system: "System",
+        dark: "A Thim",
+        bright: "A Eng"
+      },
+      mat: {
+        newChat: "Pau Thar",
+        library: "Lai Hlu",
+        images: "Mui",
+        audio: "A-ngai",
+        video: "Video",
+        settings: "A-sakna",
+        searchChats: "Pau Kawlna",
+        recent: "Athar-kheng",
+        askPlaceholder: "Sunsai hnenah ma-hal...",
+        settingsHeader: "A-sakna Pawl",
+        settingsDesc: "Akaung le a-sakna pawl thlang-na.",
+        saveChanges: "Khom-na",
+        prefTitle: "Duh-na",
+        appLanguage: "1. Pau Hmang-ding",
+        appLangDesc: "Mai-mui le pau hmang-ding thlang-na.",
+        themeTitle: "2. Mui-zaang",
+        themeDesc: "Zaang le mui-zaang thlang-na.",
+        system: "Sistem",
+        dark: "Muitham",
+        bright: "A-cen"
+      },
+      my: {
+        newChat: "စကားပြောအသစ်",
+        library: "စာကြည့်တိုက်",
+        images: "ဓာတ်ပုံများ",
+        audio: "အသံဖိုင်",
+        video: "ဗီဒီယို",
+        settings: "ဆက်တင်များ",
+        searchChats: "စကားပြောများ ရှာရန်",
+        recent: "လတ်တလော",
+        askPlaceholder: "Sunsai အား မေးမြန်းပါ...",
+        settingsHeader: "ဆက်တင်များ",
+        settingsDesc: "သင့် အကောင့်ဆက်တင်များနှင့် ဦးစားပေးမှုများကို စီမံပါ။",
+        saveChanges: "သိမ်းဆည်းမည်",
+        prefTitle: "ဦးစားပေးမှုများ",
+        appLanguage: "1. စနစ်သုံး ဘာသာစကား",
+        appLangDesc: "အသုံးပြုလိုသည့် ဘာသာစကားကို ရွေးချယ်ပါ။",
+        themeTitle: "2. နောက်ခံ သီးသန့်ပုံစံ",
+        themeDesc: "အလင်း အမှောင် ဒီဇိုင်းစတိုင်ကို ရွေးချယ်ပါ၊",
+        system: "စနစ်အတိုင်း",
+        dark: "အမှောင်",
+        bright: "အလင်း"
+      },
+      es: {
+        newChat: "Nuevo chat",
+        library: "Biblioteca",
+        images: "Imágenes",
+        audio: "Audio",
+        video: "Vídeo",
+        settings: "Ajustes",
+        searchChats: "Buscar chats",
+        recent: "Reciente",
+        askPlaceholder: "Preguntar a Sunsai...",
+        settingsHeader: "Configuración",
+        settingsDesc: "Administre las preferencias de su cuenta y modelo de Sunsai.",
+        saveChanges: "Guardar cambios",
+        prefTitle: "Preferencias",
+        appLanguage: "1. Idioma de la aplicación",
+        appLangDesc: "Seleccione el idioma de la interfaz para menús y respuestas.",
+        themeTitle: "2. Tema de apariencia",
+        themeDesc: "Elija el modo de tema de color visual.",
+        system: "Sistema",
+        dark: "Oscuro",
+        bright: "Claro"
+      }
+    };
+
+    // Mock Settings Data State
+    let userSettings = {
+      subscriptionTier: 'Pro Plan',
+      credits: 5000,
+      language: 'en',
+      theme: 'dark',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
+      audioVoice: 'Zephyr (Warm Natural)',
+      locationPermission: 'Granted (Yangon, Myanmar)',
+      publicLinks: [
+        { id: 1, title: 'Hakha Chin Natural Language Dataset Project', date: '2026-03-12', url: 'https://sunsai.ai/s/hakha-sft-v1' },
+        { id: 2, title: 'FastAPI Backend Multi-tenant Template', date: '2026-03-01', url: 'https://sunsai.ai/s/fastapi-boilerplate' }
+      ],
+      activityLog: [
+        { action: 'Fine-Tuning Run Launched', time: '10 mins ago', ip: '103.226.202.1' },
+        { action: 'Exported Memory Context (.JSON)', time: '2 hours ago', ip: '103.226.202.1' },
+        { action: 'Logged in from macOS Chrome', time: 'Yesterday at 09:14 AM', ip: '103.226.202.1' }
+      ]
+    };
+
     for (let i = 1; i <= 100; i++) {
       const topic = sampleTopics[(i - 1) % sampleTopics.length];
       recentChats.push({
@@ -271,7 +494,121 @@
 
     window.onload = function() {
       renderRecentChats();
+      applyTheme(userSettings.theme);
+      applyLanguageUI(userSettings.language);
     };
+
+    function renderPublicLinksHTML() {
+      if (!userSettings.publicLinks || userSettings.publicLinks.length === 0) {
+        return `<div class="text-xs text-gray-500 py-2">No public links created yet.</div>`;
+      }
+      return userSettings.publicLinks.map(link => `
+        <div class="bg-[#202124] p-3 rounded-xl border border-gray-800 flex items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-medium text-white truncate">${link.title}</div>
+            <div class="text-[10px] text-gray-400 mt-0.5 flex items-center gap-2">
+              <span>Created: ${link.date}</span>
+              <a href="${link.url}" target="_blank" class="text-blue-400 hover:underline truncate">${link.url}</a>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="copyToClipboard('${link.url}')" class="p-1.5 text-gray-400 hover:text-white bg-[#27272a] hover:bg-[#323538] rounded-lg transition" title="Copy Link">
+              <i class="fa-solid fa-copy text-xs"></i>
+            </button>
+            <button onclick="deletePublicLink(${link.id})" class="p-1.5 text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition" title="Revoke Link">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderActivityLogHTML() {
+      if (!userSettings.activityLog || userSettings.activityLog.length === 0) {
+        return `<div class="p-3 text-xs text-gray-500">No recent security events recorded.</div>`;
+      }
+      return userSettings.activityLog.map(log => `
+        <div class="p-3 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-shield-check text-emerald-400 text-xs"></i>
+            <div>
+              <div class="font-medium text-gray-200">${log.action}</div>
+              <div class="text-[10px] text-gray-500">IP: ${log.ip}</div>
+            </div>
+          </div>
+          <span class="text-[10px] text-gray-400 font-mono">${log.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('settings-toast');
+      const toastText = document.getElementById('settings-toast-text');
+      if (toast && toastText) {
+        toastText.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> ${msg}`;
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 3500);
+      }
+    }
+
+    function saveAllSettings() {
+      showToast("All settings saved successfully!");
+    }
+
+    function applyLanguageUI(lang) {
+      const dict = i18n[lang] || i18n.en;
+      
+      const safeSetText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+      };
+
+      safeSetText('txt-new-chat', dict.newChat);
+      safeSetText('tt-new-chat', dict.newChat);
+      safeSetText('txt-nav-library', dict.library);
+      safeSetText('tt-nav-library', dict.library);
+      safeSetText('txt-nav-images', dict.images);
+      safeSetText('tt-nav-images', dict.images);
+      safeSetText('txt-nav-audio', dict.audio);
+      safeSetText('tt-nav-audio', dict.audio);
+      safeSetText('txt-nav-video', dict.video);
+      safeSetText('tt-nav-video', dict.video);
+      safeSetText('txt-nav-settings', dict.settings);
+      safeSetText('tt-nav-settings', dict.settings);
+      safeSetText('txt-search-title', dict.searchChats);
+      safeSetText('txt-recent-title', dict.recent);
+      safeSetText('tt-recent-chats', dict.recent);
+      safeSetText('txt-tt-recent', dict.recent);
+
+      const userInput = document.getElementById('user-input');
+      if (userInput) userInput.placeholder = dict.askPlaceholder;
+
+      // Update Settings page texts dynamically if rendered
+      safeSetText('settings-head-title', dict.settingsHeader);
+      safeSetText('settings-head-desc', dict.settingsDesc);
+      safeSetText('settings-btn-save', dict.saveChanges);
+      safeSetText('pref-sec-title', dict.prefTitle);
+      safeSetText('lbl-app-lang', dict.appLanguage);
+      safeSetText('desc-app-lang', dict.appLangDesc);
+      safeSetText('lbl-theme-title', dict.themeTitle);
+      safeSetText('desc-theme-title', dict.themeDesc);
+      safeSetText('txt-theme-sys', dict.system);
+      safeSetText('txt-theme-dark', dict.dark);
+      safeSetText('txt-theme-bright', dict.bright);
+    }
+
+    function applyTheme(theme) {
+      document.body.classList.remove('theme-bright');
+      if (theme === 'bright') {
+        document.body.classList.add('theme-bright');
+      } else if (theme === 'system') {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          document.body.classList.add('theme-bright');
+        }
+      }
+    }
 
     function renderRecentChats(filter) {
       filter = filter || '';
@@ -303,7 +640,6 @@
       const inner = document.getElementById("sidebar-inner");
       sidebar.classList.toggle("collapsed");
       
-      // Toggle overflow-hidden only when sidebar is open vs collapsed so tooltips aren't clipped
       if (sidebar.classList.contains("collapsed")) {
         inner.classList.remove("overflow-hidden");
         inner.classList.add("overflow-visible");
@@ -311,6 +647,600 @@
         inner.classList.remove("overflow-visible");
         inner.classList.add("overflow-hidden");
       }
+    }
+
+    function switchNav(section) {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('bg-[#27272a]', 'text-white');
+      });
+      const activeEl = document.getElementById(`nav-${section}`);
+      if (activeEl) {
+        activeEl.classList.add('bg-[#27272a]', 'text-white');
+      }
+
+      const topThreeDots = document.getElementById("top-options-menu");
+      const container = document.getElementById("view-container");
+
+      if (section === 'Settings') {
+        topThreeDots.classList.add("hidden");
+        renderSettingsPage(container);
+      } else {
+        topThreeDots.classList.remove("hidden");
+        renderDefaultChatView(container, section);
+      }
+    }
+
+    function renderSettingsPage(container) {
+      const dict = i18n[userSettings.language] || i18n.en;
+      container.innerHTML = `
+        <div class="flex-1 overflow-y-auto p-6 md:p-10 max-w-4xl mx-auto w-full space-y-8 select-text sidebar-scroll">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-gray-800 pb-5">
+            <div>
+              <h1 id="settings-head-title" class="text-2xl font-bold text-white flex items-center gap-3">
+                <i class="fa-solid fa-sliders text-blue-400"></i> ${dict.settingsHeader}
+              </h1>
+              <p id="settings-head-desc" class="text-xs text-gray-400 mt-1">${dict.settingsDesc}</p>
+            </div>
+            <button onclick="saveAllSettings()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-5 py-2 rounded-full font-medium shadow-lg shadow-blue-600/20 transition flex items-center gap-2 active:scale-95">
+              <i class="fa-solid fa-floppy-disk"></i> <span id="settings-btn-save">${dict.saveChanges}</span>
+            </button>
+          </div>
+
+          <!-- Toast Notification Banner -->
+          <div id="settings-toast" class="hidden bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-xs flex items-center justify-between transition-all duration-300">
+            <span id="settings-toast-text" class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-base"></i> Settings updated successfully!</span>
+            <button onclick="document.getElementById('settings-toast').classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- SECTION 1: ACCOUNT -->
+          <section class="space-y-4">
+            <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-regular fa-id-card"></i> Account
+            </h2>
+            <div class="bg-[#18181b] border border-gray-800 rounded-2xl p-5 space-y-4 shadow-sm">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+                <div>
+                  <div class="text-sm font-medium text-white flex items-center gap-2">
+                    <span>1. Subscription Plan</span>
+                    <span id="tier-badge" class="bg-blue-500/20 text-blue-400 text-[10px] px-2.5 py-0.5 rounded-full font-semibold border border-blue-500/30">
+                      ${userSettings.subscriptionTier}
+                    </span>
+                    <span id="credit-badge" class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2.5 py-0.5 rounded-full font-semibold border border-yellow-500/30">
+                      ${userSettings.credits.toLocaleString()} Credits
+                    </span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-0.5">Unlimited Sunsai Auto access, standard speed processing, and custom AI Studio models.</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button onclick="showUpgradeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs px-4 py-2 rounded-xl font-medium transition shadow-md active:scale-95">
+                    <i class="fa-solid fa-bolt mr-1"></i> Upgrade Plan
+                  </button>
+                  <button onclick="showBuyCreditsModal()" class="bg-[#27272a] hover:bg-[#323538] text-gray-200 text-xs px-4 py-2 rounded-xl font-medium border border-gray-700 transition active:scale-95">
+                    <i class="fa-solid fa-coins mr-1 text-yellow-400"></i> Buy Credits
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION 2: PREFERENCES -->
+          <section class="space-y-4">
+            <h2 id="pref-sec-title" class="text-sm font-semibold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-sliders"></i> ${dict.prefTitle}
+            </h2>
+            <div class="bg-[#18181b] border border-gray-800 rounded-2xl p-5 space-y-5">
+              
+              <!-- 1. App Language -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800/80 pb-4">
+                <div>
+                  <label id="lbl-app-lang" class="text-sm font-medium text-white block">${dict.appLanguage}</label>
+                  <span id="desc-app-lang" class="text-xs text-gray-400">${dict.appLangDesc}</span>
+                </div>
+                <select id="setting-language" onchange="onLanguageChange(this.value)" class="bg-[#27272a] text-white text-xs rounded-xl border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500 w-full sm:w-64 cursor-pointer">
+                  <optgroup label="Kuki-Chin-Naga & Regional Languages">
+                    <option value="hak" ${userSettings.language === 'hak' ? 'selected' : ''}>Lai Holh / Hakha Chin</option>
+                    <option value="ted" ${userSettings.language === 'ted' ? 'selected' : ''}>Tedim Pau</option>
+                    <option value="fal" ${userSettings.language === 'fal' ? 'selected' : ''}>Falam Chin</option>
+                    <option value="mzo" ${userSettings.language === 'mzo' ? 'selected' : ''}>Mizo Ṭawng</option>
+                    <option value="mat" ${userSettings.language === 'mat' ? 'selected' : ''}>Matu Chin</option>
+                    <option value="my" ${userSettings.language === 'my' ? 'selected' : ''}>Burmese (မြန်မာ)</option>
+                  </optgroup>
+                  <optgroup label="International Languages">
+                    <option value="en" ${userSettings.language === 'en' ? 'selected' : ''}>English (US)</option>
+                    <option value="es" ${userSettings.language === 'es' ? 'selected' : ''}>Spanish (Español)</option>
+                    <option value="fr" ${userSettings.language === 'fr' ? 'selected' : ''}>French (Français)</option>
+                    <option value="de" ${userSettings.language === 'de' ? 'selected' : ''}>German (Deutsch)</option>
+                    <option value="zh" ${userSettings.language === 'zh' ? 'selected' : ''}>Chinese Simplified (中文)</option>
+                    <option value="ja" ${userSettings.language === 'ja' ? 'selected' : ''}>Japanese (日本語)</option>
+                    <option value="ko" ${userSettings.language === 'ko' ? 'selected' : ''}>Korean (한국어)</option>
+                    <option value="hi" ${userSettings.language === 'hi' ? 'selected' : ''}>Hindi (हिन्दी)</option>
+                    <option value="ar" ${userSettings.language === 'ar' ? 'selected' : ''}>Arabic (العربية)</option>
+                    <option value="pt" ${userSettings.language === 'pt' ? 'selected' : ''}>Portuguese (Português)</option>
+                    <option value="ru" ${userSettings.language === 'ru' ? 'selected' : ''}>Russian (Русский)</option>
+                    <option value="th" ${userSettings.language === 'th' ? 'selected' : ''}>Thai (ไทย)</option>
+                    <option value="vi" ${userSettings.language === 'vi' ? 'selected' : ''}>Vietnamese (Tiếng Việt)</option>
+                    <option value="id" ${userSettings.language === 'id' ? 'selected' : ''}>Indonesian (Bahasa Indonesia)</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <!-- 2. Theme -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800/80 pb-4">
+                <div>
+                  <label id="lbl-theme-title" class="text-sm font-medium text-white block">${dict.themeTitle}</label>
+                  <span id="desc-theme-title" class="text-xs text-gray-400">${dict.themeDesc}</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-[#27272a] p-1 rounded-xl border border-gray-700">
+                  <button onclick="setThemeMode('system')" id="theme-btn-system" class="px-3 py-1.5 rounded-lg text-xs font-medium ${userSettings.theme === 'system' ? 'bg-[#18181b] text-white shadow border border-gray-700' : 'text-gray-400 hover:text-white'} transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-desktop"></i> <span id="txt-theme-sys">${dict.system}</span>
+                  </button>
+                  <button onclick="setThemeMode('dark')" id="theme-btn-dark" class="px-3 py-1.5 rounded-lg text-xs font-medium ${userSettings.theme === 'dark' ? 'bg-[#18181b] text-white shadow border border-gray-700' : 'text-gray-400 hover:text-white'} transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-moon text-blue-400"></i> <span id="txt-theme-dark">${dict.dark}</span>
+                  </button>
+                  <button onclick="setThemeMode('bright')" id="theme-btn-bright" class="px-3 py-1.5 rounded-lg text-xs font-medium ${userSettings.theme === 'bright' ? 'bg-[#18181b] text-white shadow border border-gray-700' : 'text-gray-400 hover:text-white'} transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-sun text-yellow-400"></i> <span id="txt-theme-bright">${dict.bright}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3. Avatar & Voice Sample -->
+              <div class="space-y-3">
+                <label class="text-sm font-medium text-white block">3. Avatar & Audio Sample</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Avatar Selfie -->
+                  <div class="bg-[#202124] p-3.5 rounded-xl border border-gray-800 flex items-center gap-4">
+                    <img id="avatar-preview" src="${userSettings.avatarUrl}" class="w-14 h-14 rounded-full object-cover border-2 border-blue-500/50 shadow">
+                    <div class="space-y-1.5">
+                      <div class="text-xs font-medium text-white">Profile Picture / Selfie</div>
+                      <div class="flex items-center gap-2">
+                        <label class="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 rounded-lg text-[11px] cursor-pointer font-medium transition active:scale-95">
+                          Upload Selfie <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                        </label>
+                        <button onclick="takeSelfieCamera()" class="bg-[#27272a] hover:bg-[#323538] text-gray-300 px-2.5 py-1 rounded-lg text-[11px] transition active:scale-95">
+                          <i class="fa-solid fa-camera mr-1"></i> Capture
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Voice Audio Sample -->
+                  <div class="bg-[#202124] p-3.5 rounded-xl border border-gray-800 flex flex-col justify-between">
+                    <div>
+                      <div class="text-xs font-medium text-white flex justify-between items-center">
+                        <span>Audio Voice Profile</span>
+                        <span id="audio-voice-tag" class="text-[10px] text-gray-400">${userSettings.audioVoice}</span>
+                      </div>
+                      <span class="text-[11px] text-gray-400">Used for TTS natural speaker synthesis.</span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-2">
+                      <button onclick="playAudioSample()" class="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-play text-[10px]"></i> Play Sample
+                      </button>
+                      <button onclick="recordAudioSample()" id="record-sample-btn" class="bg-[#27272a] hover:bg-[#323538] text-gray-300 px-2.5 py-1 rounded-lg text-[11px] transition flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-microphone text-red-400"></i> Record Voice
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- SECTION 3: DATA & PRIVACY -->
+          <section class="space-y-4 pb-12">
+            <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved"></i> Data & Privacy
+            </h2>
+            <div class="bg-[#18181b] border border-gray-800 rounded-2xl p-5 space-y-4 divide-y divide-gray-800/80">
+              
+              <!-- 1. Import Memory -->
+              <div class="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="text-sm font-medium text-white">1. Import Memory Context</div>
+                  <div class="text-xs text-gray-400">Upload past conversation backup or memory export files (.JSON, .TXT).</div>
+                </div>
+                <label class="bg-[#27272a] hover:bg-[#323538] text-gray-200 text-xs px-4 py-2 rounded-xl font-medium border border-gray-700 cursor-pointer text-center transition shrink-0 active:scale-95">
+                  <i class="fa-solid fa-file-import mr-1.5 text-blue-400"></i> Import File
+                  <input type="file" accept=".json,.txt" class="hidden" onchange="importMemoryFile(event)">
+                </label>
+              </div>
+
+              <!-- 2. Manage Public Link -->
+              <div class="pt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-medium text-white">2. Manage Public Links</div>
+                    <div class="text-xs text-gray-400">Active public links created from your chat threads.</div>
+                  </div>
+                  <span id="public-links-count" class="text-xs bg-[#27272a] px-2.5 py-1 rounded-lg text-gray-300 font-mono">${userSettings.publicLinks.length} Active</span>
+                </div>
+                <div id="public-links-list" class="space-y-2">
+                  ${renderPublicLinksHTML()}
+                </div>
+              </div>
+
+              <!-- 3 & 4. Send Feedback & Help Link -->
+              <div class="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-[#202124] p-3.5 rounded-xl border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-medium text-white">3. Send Feedback</div>
+                    <div class="text-[11px] text-gray-400">Share suggestions or issue reports.</div>
+                  </div>
+                  <button onclick="openFeedbackModal()" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 px-3 py-1.5 rounded-lg transition font-medium shrink-0 active:scale-95">
+                    Submit
+                  </button>
+                </div>
+
+                <div class="bg-[#202124] p-3.5 rounded-xl border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-medium text-white">4. Help & Support</div>
+                    <div class="text-[11px] text-gray-400">Documentation & AI guidelines.</div>
+                  </div>
+                  <button onclick="openHelpCenter()" class="text-xs bg-[#27272a] hover:bg-[#323538] text-gray-200 border border-gray-700 px-3 py-1.5 rounded-lg transition font-medium shrink-0 active:scale-95">
+                    Help Center <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 5. Location Access -->
+              <div class="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="text-sm font-medium text-white">5. Access Location</div>
+                  <div id="location-status-text" class="text-xs text-gray-400">Current status: <span class="text-emerald-400 font-medium">${userSettings.locationPermission}</span></div>
+                </div>
+                <button onclick="fetchCurrentLocation()" class="bg-[#27272a] hover:bg-[#323538] text-gray-200 text-xs px-4 py-2 rounded-xl font-medium border border-gray-700 transition shrink-0 active:scale-95">
+                  <i class="fa-solid fa-location-crosshairs mr-1 text-blue-400"></i> Refresh Location
+                </button>
+              </div>
+
+              <!-- 6. Activity Logs -->
+              <div class="pt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-medium text-white">6. Recent Security Activity</div>
+                    <div class="text-xs text-gray-400">Audit trail of account access and action events.</div>
+                  </div>
+                </div>
+                <div id="activity-log-list" class="bg-[#202124] rounded-xl border border-gray-800 divide-y divide-gray-800/60 overflow-hidden">
+                  ${renderActivityLogHTML()}
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+      `;
+    }
+
+    function renderDefaultChatView(container, sectionName) {
+      container.innerHTML = `
+        <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12 select-text">
+          <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+            <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+            <div class="content flex-1">Switched to <b>${sectionName}</b> workspace. How can I help you build or create today?</div>
+          </div>
+        </div>
+
+        <div class="p-4 max-w-4xl mx-auto w-full">
+          <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
+            <div id="attachment-menu" class="hidden absolute bottom-14 left-0 w-52 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-2 text-sm text-gray-300">
+              <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+                <i class="fa-solid fa-image text-blue-400"></i> Upload Image <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+              </label>
+              <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+                <i class="fa-solid fa-file-lines text-green-400"></i> Upload Document <input type="file" class="hidden" onchange="handleFileSelect(event)">
+              </label>
+            </div>
+
+            <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
+            
+            <input id="user-input" type="text" placeholder="${i18n[userSettings.language]?.askPlaceholder || 'Ask Sunsai...'}" class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" oninput="handleInputChange()" onkeydown="if(event.key==='Enter') sendMessage()">
+            
+            <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition px-1" title="Voice Input">
+              <i class="fa-solid fa-microphone text-base"></i>
+            </button>
+
+            <div class="relative">
+              <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
+                <span id="selected-model">Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+              </button>
+              <div id="model-dropdown" class="hidden absolute right-0 bottom-8 w-36 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-xs text-gray-300">
+                <div onclick="selectModel('Super')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Super</div>
+                <div onclick="selectModel('Normal')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Normal</div>
+                <div onclick="selectModel('Free')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Free</div>
+              </div>
+            </div>
+
+            <button id="send-btn" onclick="sendMessage()" class="hidden text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
+          </div>
+          <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
+        </div>
+      `;
+    }
+
+    function onLanguageChange(val) {
+      userSettings.language = val;
+      applyLanguageUI(val);
+      showToast(`Language set to ${val.toUpperCase()}`);
+    }
+
+    function setThemeMode(mode) {
+      userSettings.theme = mode;
+      applyTheme(mode);
+      
+      document.querySelectorAll('#theme-btn-system, #theme-btn-dark, #theme-btn-bright').forEach(b => {
+        if(b) b.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition flex items-center gap-1.5";
+      });
+      const activeBtn = document.getElementById(`theme-btn-${mode}`);
+      if (activeBtn) {
+        activeBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium bg-[#18181b] text-white transition flex items-center gap-1.5 shadow border border-gray-700";
+      }
+      showToast(`Theme changed to ${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
+    }
+
+    function openModal(htmlContent) {
+      const modal = document.getElementById('modal-container');
+      const content = document.getElementById('modal-content');
+      content.innerHTML = htmlContent;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal-container');
+      modal.classList.add('hidden');
+    }
+
+    function showUpgradeModal() {
+      openModal(`
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 text-blue-400">
+            <i class="fa-solid fa-bolt text-2xl"></i>
+            <h3 class="text-lg font-bold text-white">Upgrade Subscription Tier</h3>
+          </div>
+          <p class="text-xs text-gray-300">Choose a plan to unlock higher performance, higher rate limits, and custom AI studio models.</p>
+          <div class="space-y-2 mt-4">
+            <div onclick="selectUpgradePlan('Super Pro Unlimited')" class="p-3 bg-[#202124] hover:bg-[#27272a] border border-blue-500/50 rounded-xl cursor-pointer transition flex justify-between items-center">
+              <div>
+                <div class="text-sm font-bold text-white">Super Pro Unlimited</div>
+                <div class="text-[11px] text-gray-400">Maximum speed, priority access, unlimited runs.</div>
+              </div>
+              <span class="text-xs font-bold text-blue-400">$20 / mo</span>
+            </div>
+            <div onclick="selectUpgradePlan('Enterprise Custom')" class="p-3 bg-[#202124] hover:bg-[#27272a] border border-gray-800 rounded-xl cursor-pointer transition flex justify-between items-center">
+              <div>
+                <div class="text-sm font-bold text-white">Enterprise Custom</div>
+                <div class="text-[11px] text-gray-400">Dedicated fine-tuning cluster & private API.</div>
+              </div>
+              <span class="text-xs font-bold text-gray-400">$99 / mo</span>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="closeModal()" class="px-4 py-2 text-xs text-gray-400 hover:text-white">Cancel</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function selectUpgradePlan(planName) {
+      userSettings.subscriptionTier = planName;
+      closeModal();
+      document.getElementById('tier-badge').innerText = planName;
+      addActivityLog(`Upgraded Plan to ${planName}`);
+      showToast(`Subscription upgraded to ${planName}!`);
+    }
+
+    function showBuyCreditsModal() {
+      openModal(`
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 text-yellow-400">
+            <i class="fa-solid fa-coins text-2xl"></i>
+            <h3 class="text-lg font-bold text-white">Buy Additional API Credits</h3>
+          </div>
+          <p class="text-xs text-gray-300">Select a credit top-up pack for processing image and audio synthesis jobs.</p>
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div onclick="addCredits(2500)" class="p-3 bg-[#202124] hover:bg-[#27272a] border border-gray-800 hover:border-yellow-500/50 rounded-xl cursor-pointer text-center transition">
+              <div class="text-base font-bold text-yellow-400">+2,500</div>
+              <div class="text-[11px] text-gray-400 mt-1">$5.00 USD</div>
+            </div>
+            <div onclick="addCredits(10000)" class="p-3 bg-[#202124] hover:bg-[#27272a] border border-yellow-500/50 rounded-xl cursor-pointer text-center transition">
+              <div class="text-base font-bold text-yellow-400">+10,000</div>
+              <div class="text-[11px] text-gray-400 mt-1">$15.00 USD (Best)</div>
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button onclick="closeModal()" class="px-4 py-2 text-xs text-gray-400 hover:text-white">Cancel</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function addCredits(amount) {
+      userSettings.credits += amount;
+      closeModal();
+      const badge = document.getElementById('credit-badge');
+      if (badge) badge.innerText = `${userSettings.credits.toLocaleString()} Credits`;
+      addActivityLog(`Purchased +${amount.toLocaleString()} API Credits`);
+      showToast(`Successfully added +${amount.toLocaleString()} credits!`);
+    }
+
+    function uploadAvatar(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          userSettings.avatarUrl = e.target.result;
+          const img = document.getElementById('avatar-preview');
+          if (img) img.src = e.target.result;
+          showToast("Profile picture updated!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function takeSelfieCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        openModal(`
+          <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+          <div class="space-y-4">
+            <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-camera text-blue-400"></i> Capture Profile Photo</h3>
+            <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+              <video id="webcam-video" autoplay class="w-full h-full object-cover"></video>
+            </div>
+            <div class="flex justify-end gap-2">
+              <button onclick="closeModal()" class="px-4 py-2 text-xs text-gray-400 hover:text-white">Cancel</button>
+              <button onclick="captureSnapshot()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-medium">Capture Photo</button>
+            </div>
+          </div>
+        `);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+          const video = document.getElementById('webcam-video');
+          if (video) video.srcObject = stream;
+        }).catch(() => {
+          closeModal();
+          userSettings.avatarUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256';
+          const img = document.getElementById('avatar-preview');
+          if (img) img.src = userSettings.avatarUrl;
+          showToast("Camera access simulated!");
+        });
+      } else {
+        userSettings.avatarUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256';
+        const img = document.getElementById('avatar-preview');
+        if (img) img.src = userSettings.avatarUrl;
+        showToast("Profile photo updated!");
+      }
+    }
+
+    function captureSnapshot() {
+      const video = document.getElementById('webcam-video');
+      if (video && video.srcObject) {
+        const stream = video.srcObject;
+        stream.getTracks().forEach(track => track.stop());
+      }
+      userSettings.avatarUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256';
+      const img = document.getElementById('avatar-preview');
+      if (img) img.src = userSettings.avatarUrl;
+      closeModal();
+      showToast("Profile photo captured successfully!");
+    }
+
+    function playAudioSample() {
+      const synth = window.speechSynthesis;
+      if (synth) {
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance("Hello Tha Hmun Mang, Sunsai Natural Voice profile activated.");
+        utter.pitch = 1.0;
+        utter.rate = 0.95;
+        synth.speak(utter);
+        showToast("Playing voice audio preview...");
+      } else {
+        showToast("Audio preview fallback played.");
+      }
+    }
+
+    function recordAudioSample() {
+      const btn = document.getElementById('record-sample-btn');
+      if (!btn) return;
+      btn.innerHTML = `<i class="fa-solid fa-circle text-red-500 animate-ping"></i> Recording...`;
+      setTimeout(() => {
+        btn.innerHTML = `<i class="fa-solid fa-microphone text-red-400"></i> Record Voice`;
+        userSettings.audioVoice = 'Custom Sample Recorded (10s)';
+        const tag = document.getElementById('audio-voice-tag');
+        if (tag) tag.innerText = userSettings.audioVoice;
+        showToast("Voice sample saved successfully!");
+      }, 3000);
+    }
+
+    function importMemoryFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        addActivityLog(`Imported memory store (${file.name})`);
+        showToast(`Memory file "${file.name}" imported into store!`);
+      }
+    }
+
+    function deletePublicLink(id) {
+      userSettings.publicLinks = userSettings.publicLinks.filter(l => l.id !== id);
+      const listEl = document.getElementById('public-links-list');
+      const countEl = document.getElementById('public-links-count');
+      if (listEl) listEl.innerHTML = renderPublicLinksHTML();
+      if (countEl) countEl.innerText = `${userSettings.publicLinks.length} Active`;
+      addActivityLog(`Revoked Public Link ID #${id}`);
+      showToast("Public link revoked!");
+    }
+
+    function copyToClipboard(text) {
+      const dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      showToast("Public link copied to clipboard!");
+    }
+
+    function openFeedbackModal() {
+      openModal(`
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="space-y-4">
+          <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-comment-dots text-blue-400"></i> Send Product Feedback</h3>
+          <textarea id="feedback-text" rows="4" placeholder="Describe your experience or feature request..." class="w-full bg-[#202124] border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500"></textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="closeModal()" class="px-4 py-2 text-xs text-gray-400 hover:text-white">Cancel</button>
+            <button onclick="submitFeedback()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-medium">Submit Feedback</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function submitFeedback() {
+      const txt = document.getElementById('feedback-text').value;
+      if (txt.trim().length > 0) {
+        closeModal();
+        addActivityLog('Submitted Product Feedback');
+        showToast("Feedback transmitted to product team!");
+      }
+    }
+
+    function openHelpCenter() {
+      window.open('https://support.google.com', '_blank');
+    }
+
+    function fetchCurrentLocation() {
+      const statusEl = document.getElementById('location-status-text');
+      if (navigator.geolocation) {
+        if (statusEl) statusEl.innerHTML = `Current status: <span class="text-amber-400 font-medium">Locating...</span>`;
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userSettings.locationPermission = `Granted (Lat: ${pos.coords.latitude.toFixed(2)}, Lon: ${pos.coords.longitude.toFixed(2)})`;
+            if (statusEl) statusEl.innerHTML = `Current status: <span class="text-emerald-400 font-medium">${userSettings.locationPermission}</span>`;
+            showToast("Location updated!");
+          },
+          () => {
+            userSettings.locationPermission = 'Granted (Yangon, Myanmar)';
+            if (statusEl) statusEl.innerHTML = `Current status: <span class="text-emerald-400 font-medium">${userSettings.locationPermission}</span>`;
+            showToast("Location refreshed (Yangon, Myanmar)");
+          }
+        );
+      } else {
+        showToast("Geolocation not supported by browser.");
+      }
+    }
+
+    function addActivityLog(action) {
+      userSettings.activityLog.unshift({
+        action: action,
+        time: 'Just now',
+        ip: '103.226.202.1'
+      });
+      if (userSettings.activityLog.length > 5) userSettings.activityLog.pop();
+      const logEl = document.getElementById('activity-log-list');
+      if (logEl) logEl.innerHTML = renderActivityLogHTML();
     }
 
     function toggleSearch() {
@@ -326,61 +1256,51 @@
       renderRecentChats(query);
     }
 
-    function switchNav(section) {
-      document.querySelectorAll('.nav-item').forEach(el => {
-        el.classList.remove('bg-[#27272a]', 'text-white');
-      });
-      const activeEl = document.getElementById(`nav-${section}`);
-      if (activeEl) {
-        activeEl.classList.add('bg-[#27272a]', 'text-white');
-      }
-
-      const chatStream = document.getElementById("chat-stream");
-      chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Switched to <b>${section}</b> view. Select or start a new chat to begin working.</div></div>`;
-    }
-
     function toggleOptionsMenu(event) {
       event.stopPropagation();
       const dropdown = document.getElementById("options-dropdown");
       dropdown.classList.toggle("hidden");
-      document.getElementById("model-dropdown").classList.add("hidden");
-      document.getElementById("attachment-menu").classList.add("hidden");
+      const modelDd = document.getElementById("model-dropdown");
+      if(modelDd) modelDd.classList.add("hidden");
+      const attachMenu = document.getElementById("attachment-menu");
+      if(attachMenu) attachMenu.classList.add("hidden");
     }
 
     function menuAction(action) {
       const chatStream = document.getElementById("chat-stream");
-      chatStream.innerHTML += `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Executed action: <b>${action}</b> successfully.</div></div>`;
+      if (chatStream) {
+        chatStream.innerHTML += `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Executed action: <b>${action}</b> successfully.</div></div>`;
+      }
       document.getElementById("options-dropdown").classList.add("hidden");
     }
 
     function toggleAttachmentMenu(event) {
       event.stopPropagation();
       const menu = document.getElementById("attachment-menu");
-      menu.classList.toggle("hidden");
-      document.getElementById("options-dropdown").classList.add("hidden");
-      document.getElementById("model-dropdown").classList.add("hidden");
+      if(menu) menu.classList.toggle("hidden");
     }
 
     function handleFileSelect(event) {
       const file = event.target.files[0];
       if (file) {
         const input = document.getElementById("user-input");
-        input.value = `[Attached: ${file.name}]`;
+        if(input) input.value = `[Attached: ${file.name}]`;
       }
-      document.getElementById("attachment-menu").classList.add("hidden");
+      const menu = document.getElementById("attachment-menu");
+      if(menu) menu.classList.add("hidden");
     }
 
     function toggleModelDropdown(event) {
       event.stopPropagation();
       const dropdown = document.getElementById("model-dropdown");
-      dropdown.classList.toggle("hidden");
-      document.getElementById("options-dropdown").classList.add("hidden");
-      document.getElementById("attachment-menu").classList.add("hidden");
+      if(dropdown) dropdown.classList.toggle("hidden");
     }
 
     function selectModel(modelName) {
-      document.getElementById("selected-model").innerText = `Sunsai ${modelName}`;
-      document.getElementById("model-dropdown").classList.add("hidden");
+      const selected = document.getElementById("selected-model");
+      if(selected) selected.innerText = `Sunsai ${modelName}`;
+      const dropdown = document.getElementById("model-dropdown");
+      if(dropdown) dropdown.classList.add("hidden");
     }
 
     let recognition = null;
@@ -389,6 +1309,7 @@
     function handleInputChange() {
       const input = document.getElementById("user-input");
       const sendBtn = document.getElementById("send-btn");
+      if (!input || !sendBtn) return;
       if (input.value.trim().length > 0) {
         sendBtn.classList.remove("hidden");
       } else {
@@ -399,6 +1320,7 @@
     function toggleVoiceInput() {
       const micBtn = document.getElementById("mic-btn");
       const input = document.getElementById("user-input");
+      if (!micBtn || !input) return;
 
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -436,36 +1358,35 @@
       }
 
       if (isListening) {
-        try {
-          recognition.stop();
-        } catch (e) {}
+        try { recognition.stop(); } catch (e) {}
         isListening = false;
         micBtn.classList.remove("text-red-500", "animate-pulse");
         input.placeholder = "Ask Sunsai...";
       } else {
-        try {
-          recognition.start();
-        } catch (e) {
-          console.error(e);
-        }
+        try { recognition.start(); } catch (e) { console.error(e); }
       }
     }
 
     window.addEventListener("click", () => {
-      document.getElementById("options-dropdown").classList.add("hidden");
-      document.getElementById("model-dropdown").classList.add("hidden");
-      document.getElementById("attachment-menu").classList.add("hidden");
+      const options = document.getElementById("options-dropdown");
+      if(options) options.classList.add("hidden");
+      const modelDd = document.getElementById("model-dropdown");
+      if(modelDd) modelDd.classList.add("hidden");
+      const attach = document.getElementById("attachment-menu");
+      if(attach) attach.classList.add("hidden");
     });
 
     async function sendMessage() {
       const input = document.getElementById("user-input");
+      if (!input) return;
       const message = input.value.trim();
       if (!message) return;
 
       const chatStream = document.getElementById("chat-stream");
+      if (!chatStream) return;
       chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm select-text">${message}</div></div>`;
       input.value = "";
-      handleInputChange(); // Hide send button again
+      handleInputChange();
 
       const responseDiv = document.createElement("div");
       responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed select-text";
@@ -475,11 +1396,15 @@
     }
 
     function newChat() {
-      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you today?</div></div>`;
+      switchNav('Library');
     }
 
     function loadSession(id) {
-      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Loaded session #${id} from archive history. You can continue asking questions or execute code snippets here.</div></div>`;
+      switchNav('Library');
+      const chatStream = document.getElementById("chat-stream");
+      if (chatStream) {
+        chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Loaded session #${id} from archive history. You can continue asking questions or execute code snippets here.</div></div>`;
+      }
     }
   </script>
 </body>
