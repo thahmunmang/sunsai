@@ -11,12 +11,12 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; user-select: none; }
-    .sidebar { background-color: #131314; width: 240px; transition: width 0.3s ease; }
-    .sidebar.collapsed { width: 56px; padding: 8px 4px !important; }
+    .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
+    .sidebar.collapsed { width: 64px; padding: 12px 6px !important; }
     .sidebar.collapsed .hide-on-collapse { display: none !important; }
     .sidebar.collapsed .show-on-collapse { display: flex !important; }
     .sidebar.collapsed .collapse-tight { padding: 8px 6px !important; justify-content: center !important; }
-    .sidebar.collapsed .collapse-tight i { margin-right: 0 !important; font-size: 15px; }
+    .sidebar.collapsed .collapse-tight i { margin-right: 0 !important; font-size: 16px; }
     .show-on-collapse { display: none; }
     .chat-container { background-color: #0e0e10; }
     .input-box { background-color: #1e1f20; border-radius: 28px; }
@@ -31,7 +31,7 @@
     .sidebar.collapsed .tooltip-container:hover::after {
       content: attr(data-tooltip);
       position: absolute;
-      left: 62px;
+      left: 70px;
       background: #27272a;
       color: #fff;
       padding: 4px 8px;
@@ -45,32 +45,36 @@
 </head>
 <body class="flex h-screen overflow-hidden relative">
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20 relative">
-    
-    <!-- Vertical Sidebar Toggle Button next to sidebar edge -->
-    <button onclick="toggleSidebar()" data-tooltip="Toggle Sidebar" class="absolute -right-3.5 top-6 bg-[#1f2022] hover:bg-[#2e3033] text-gray-300 w-7 h-7 rounded-full flex items-center justify-center border border-gray-700 shadow-md cursor-pointer z-30 transition">
-      <i id="toggle-icon" class="fa-solid fa-chevron-left text-xs"></i>
-    </button>
-
+  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
     <div class="flex flex-col h-full overflow-hidden">
-      <!-- Top header with Sunsai S Logo / Expand Toggle -->
-      <div class="flex items-center justify-between px-1.5 py-1 mb-2">
+      
+      <!-- Top Header: Sidebar On State -->
+      <div class="flex items-center justify-between px-1.5 py-1 mb-2 hide-on-collapse">
         <div class="flex items-center gap-2.5">
-          <!-- Sunsai S Logo (Clickable to toggle when collapsed or expanded) -->
-          <button onclick="toggleSidebar()" data-tooltip="Sunsai AI Studio" class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
+          <div class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
             S
-          </button>
-          <span class="font-bold text-base tracking-wide text-white hide-on-collapse">Sunsai</span>
+          </div>
+          <span class="font-bold text-base tracking-wide text-white">Sunsai</span>
         </div>
+        <button onclick="toggleSidebar()" data-tooltip="Toggle Sidebar" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition">
+          <i class="fa-solid fa-bars text-sm"></i>
+        </button>
       </div>
 
-      <!-- New Chat Button -->
+      <!-- Top Header: Sidebar Off State (Icon S on top, Hamburger below it) -->
+      <div class="show-on-collapse flex flex-col items-center gap-2.5 mb-3 px-1 py-1">
+        <div data-tooltip="Sunsai AI Studio" class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
+          S
+        </div>
+        <button onclick="toggleSidebar()" data-tooltip="Expand Sidebar" class="tooltip-container text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition">
+          <i class="fa-solid fa-bars text-sm"></i>
+        </button>
+      </div>
+
       <button onclick="newChat()" data-tooltip="New chat" class="tooltip-container my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
         <i class="fa-solid fa-plus w-5 text-center text-sm"></i> <span class="hide-on-collapse">New chat</span>
       </button>
 
-      <!-- Navigation Links (Library, Images, Audio, Video) -->
       <div class="space-y-1 shrink-0">
         <div onclick="switchNav('Library')" data-tooltip="Library" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-folder-open w-5 text-center"></i> <span class="hide-on-collapse">Library</span>
@@ -86,7 +90,6 @@
         </div>
       </div>
 
-      <!-- Search Section (Placed before Recent) -->
       <div class="mt-3 hide-on-collapse">
         <div class="flex items-center justify-between px-2 mb-1">
           <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Search Chats</span>
@@ -97,7 +100,6 @@
         </div>
       </div>
 
-      <!-- Recent Label -->
       <div class="mt-3 flex items-center justify-between px-2 hide-on-collapse shrink-0">
         <div class="flex items-center gap-2">
           <i class="fa-regular fa-clock text-xs text-blue-400"></i>
@@ -106,25 +108,23 @@
         <span id="chat-count-badge" class="text-[10px] bg-[#1e1f20] text-gray-400 px-1.5 py-0.5 rounded-full font-mono">100</span>
       </div>
       
-      <!-- Collapsed State Single Recent Icon -->
       <div data-tooltip="Recent Chats (100)" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
         <i class="fa-regular fa-clock text-base"></i>
       </div>
 
-      <!-- Scrollable Recent List (100 Items) -->
       <div class="sidebar-scroll flex-1 overflow-y-auto mt-1 space-y-0.5 text-sm text-gray-400 hide-on-collapse">
         <ul id="history-list" class="space-y-0.5">
-          <!-- Populated dynamically via script -->
+          <!-- Populated dynamically with 100 items -->
         </ul>
       </div>
     </div>
 
-    <!-- Bottom User Profile Section (Bigger icon, very bottom) -->
     <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
       <div data-tooltip="Settings" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
         <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
         <span class="hide-on-collapse">Settings</span>
       </div>
+      <!-- User profile at the very bottom, sized slightly larger -->
       <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
         <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center"></i>
         <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
@@ -134,21 +134,18 @@
 
   <main class="flex-1 flex flex-col justify-between h-full relative">
     
-    <!-- Absolute Positioned Three-Dots Menu Button -->
     <div class="absolute top-4 right-6 z-10">
       <button onclick="toggleOptionsMenu(event)" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-[#1e1f20] transition">
         <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
       </button>
-      <!-- Dropdown Menu -->
       <div id="options-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-sm text-gray-300">
         <div onclick="menuAction('share')" class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-2.5"><i class="fa-solid fa-share-nodes text-xs"></i> Share chat</div>
         <div onclick="menuAction('pdf')" class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-2.5"><i class="fa-solid fa-file-pdf text-xs"></i> Download as PDF</div>
       </div>
     </div>
 
-    <!-- Chat Stream Output -->
-    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12">
-      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text">
+    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12 select-text">
+      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
         <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
         <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today? Select from 100+ starter prompts or history sessions below.</div>
       </div>
@@ -157,7 +154,6 @@
     <div class="p-4 max-w-4xl mx-auto w-full">
       <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
         
-        <!-- Attachment Popup Menu -->
         <div id="attachment-menu" class="hidden absolute bottom-14 left-0 w-52 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-2 text-sm text-gray-300">
           <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
             <i class="fa-solid fa-image text-blue-400"></i> Upload Image <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
@@ -171,10 +167,11 @@
         
         <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" onkeydown="if(event.key==='Enter') sendMessage()">
         
-        <!-- Mic Input Button -->
-        <button onclick="toggleMic()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition" title="Voice Input"><i class="fa-solid fa-microphone text-base"></i></button>
+        <!-- Functional Voice Input Microphone Button -->
+        <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition" title="Voice Input">
+          <i class="fa-solid fa-microphone text-base"></i>
+        </button>
 
-        <!-- Model Selector Dropdown -->
         <div class="relative">
           <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
             <span id="selected-model">Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
@@ -194,10 +191,21 @@
 
   <script>
     const recentChats = [];
+    const sampleTopics = [
+      "Running Apps from GitHub", "English-Hakha Dictionary Extraction", "Hakha Chin SFT Token Requirements",
+      "LLM Fine-Tuning Methods", "FastAPI Backend Setup", "React Tailwind Responsive Layouts",
+      "Python Web Scraping with BeautifulSoup", "Docker Containerization Best Practices", "TypeScript Generics Explained",
+      "Database Indexing Optimization", "RESTful API Authentication", "GraphQL vs REST Architecture",
+      "CI/CD Pipeline Automation", "Kubernetes Cluster Management", "Neural Network Loss Functions",
+      "Transformer Attention Mechanism", "Prompt Engineering Strategies", "WebAssembly Performance Benchmarks",
+      "Redis Caching Strategies", "Async IO in Python"
+    ];
+
     for (let i = 1; i <= 100; i++) {
+      const topic = sampleTopics[(i - 1) % sampleTopics.length];
       recentChats.push({
         id: i,
-        title: i === 1 ? "Running Apps from GitHub" : `Session #${i}: AI Workflow & Development Strategy`
+        title: `Session #${i}: ${topic} - Comprehensive workflow analysis & implementation details for large-scale production environments.`
       });
     }
 
@@ -215,7 +223,7 @@
 
       filtered.forEach(chat => {
         const li = document.createElement('li');
-        li.className = "px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate select-text";
+        li.className = "px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate select-text text-gray-400 hover:text-gray-200";
         li.innerText = chat.title;
         li.onclick = () => loadSession(chat.id);
         listEl.appendChild(li);
@@ -224,13 +232,7 @@
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
-      const toggleIcon = document.getElementById("toggle-icon");
       sidebar.classList.toggle("collapsed");
-      if (sidebar.classList.contains("collapsed")) {
-        toggleIcon.className = "fa-solid fa-chevron-right text-xs";
-      } else {
-        toggleIcon.className = "fa-solid fa-chevron-left text-xs";
-      }
     }
 
     function toggleSearch() {
@@ -260,7 +262,8 @@
     }
 
     function menuAction(action) {
-      alert(`Triggered action: ${action}`);
+      const chatStream = document.getElementById("chat-stream");
+      chatStream.innerHTML += `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Executed action: <b>${action}</b> successfully.</div></div>`;
       document.getElementById("options-dropdown").classList.add("hidden");
     }
 
@@ -294,14 +297,63 @@
       document.getElementById("model-dropdown").classList.add("hidden");
     }
 
-    function toggleMic() {
+    let recognition = null;
+    let isListening = false;
+
+    function toggleVoiceInput() {
       const micBtn = document.getElementById("mic-btn");
-      micBtn.classList.toggle("text-red-500");
       const input = document.getElementById("user-input");
-      if (micBtn.classList.contains("text-red-500")) {
-        input.placeholder = "Listening...";
-      } else {
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        input.placeholder = "Speech recognition not supported in this browser.";
+        return;
+      }
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          isListening = true;
+          micBtn.classList.add("text-red-500", "animate-pulse");
+          input.placeholder = "Listening...";
+        };
+
+        recognition.onresult = (event) => {
+          const speechToText = event.results[0][0].transcript;
+          input.value = speechToText;
+        };
+
+        recognition.onerror = () => {
+          isListening = false;
+          micBtn.classList.remove("text-red-500", "animate-pulse");
+          input.placeholder = "Ask Sunsai...";
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          micBtn.classList.remove("text-red-500", "animate-pulse");
+          input.placeholder = "Ask Sunsai...";
+        };
+      }
+
+      if (isListening) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          // Ignore if already stopped
+        }
+        isListening = false;
+        micBtn.classList.remove("text-red-500", "animate-pulse");
         input.placeholder = "Ask Sunsai...";
+      } else {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
 
@@ -322,17 +374,17 @@
 
       const responseDiv = document.createElement("div");
       responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed select-text";
-      responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">I have processed your request: <b>${message}</b>. Here is the generated output from Sunsai AI Studio runtime environment.</div>`;
+      responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">I have processed your request regarding <b>"${message}"</b>. Here is the comprehensive AI-generated workflow and response from Sunsai AI Studio environment.</div>`;
       chatStream.appendChild(responseDiv);
       chatStream.scrollTop = chatStream.scrollHeight;
     }
 
     function newChat() {
-      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you?</div></div>`;
+      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you today?</div></div>`;
     }
 
     function loadSession(id) {
-      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Loaded session #${id} from history archive.</div></div>`;
+      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Loaded session #${id} from archive history. You can continue asking questions or execute code snippets here.</div></div>`;
     }
   </script>
 </body>
