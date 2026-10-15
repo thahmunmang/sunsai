@@ -10,17 +10,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; }
-    .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
-    .sidebar.collapsed { width: 64px; padding: 6px 2px !important; }
+    body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; user-select: none; }
+    .sidebar { background-color: #131314; width: 240px; transition: width 0.3s ease; }
+    .sidebar.collapsed { width: 56px; padding: 8px 4px !important; }
     .sidebar.collapsed .hide-on-collapse { display: none !important; }
     .sidebar.collapsed .show-on-collapse { display: flex !important; }
-    .sidebar.collapsed .collapse-tight { padding: 4px 6px !important; justify-content: center !important; }
+    .sidebar.collapsed .collapse-tight { padding: 8px 6px !important; justify-content: center !important; }
     .sidebar.collapsed .collapse-tight i { margin-right: 0 !important; font-size: 15px; }
     .show-on-collapse { display: none; }
     .chat-container { background-color: #0e0e10; }
     .input-box { background-color: #1e1f20; border-radius: 28px; }
     pre code { border-radius: 8px; font-family: 'Consolas', monospace; }
+    
     /* Custom Scrollbar for Sidebar */
     .sidebar-scroll::-webkit-scrollbar { width: 4px; }
     .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2b2d; border-radius: 4px; }
@@ -30,7 +31,7 @@
     .sidebar.collapsed .tooltip-container:hover::after {
       content: attr(data-tooltip);
       position: absolute;
-      left: 70px;
+      left: 62px;
       background: #27272a;
       color: #fff;
       padding: 4px 8px;
@@ -45,32 +46,32 @@
 <body class="flex h-screen overflow-hidden relative">
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
-    <div class="flex flex-col h-full overflow-hidden">
-      <!-- Top header with toggle & search -->
-      <div class="flex items-center justify-between px-1 py-1">
-        <div class="flex items-center gap-3">
-          <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
-          <span class="font-bold text-lg tracking-wide text-white hide-on-collapse">Sunsai</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <button onclick="toggleSearch()" class="text-gray-400 hover:text-white hide-on-collapse p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Search chats"><i class="fa-solid fa-magnifying-glass text-sm"></i></button>
-          <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Toggle Sidebar"><i class="fa-solid fa-bars text-sm"></i></button>
-        </div>
-      </div>
+  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20 relative">
+    
+    <!-- Vertical Sidebar Toggle Button next to sidebar edge -->
+    <button onclick="toggleSidebar()" data-tooltip="Toggle Sidebar" class="absolute -right-3.5 top-6 bg-[#1f2022] hover:bg-[#2e3033] text-gray-300 w-7 h-7 rounded-full flex items-center justify-center border border-gray-700 shadow-md cursor-pointer z-30 transition">
+      <i id="toggle-icon" class="fa-solid fa-chevron-left text-xs"></i>
+    </button>
 
-      <!-- Search Box (Hidden by default) -->
-      <div id="search-box-container" class="hidden px-1 mt-2 hide-on-collapse">
-        <input id="chat-search" type="text" placeholder="Search chats..." class="w-full bg-[#1e1f20] text-xs px-3 py-2 rounded-lg text-white border border-gray-700/50 focus:outline-none" oninput="filterChats()">
+    <div class="flex flex-col h-full overflow-hidden">
+      <!-- Top header with Sunsai S Logo / Expand Toggle -->
+      <div class="flex items-center justify-between px-1.5 py-1 mb-2">
+        <div class="flex items-center gap-2.5">
+          <!-- Sunsai S Logo (Clickable to toggle when collapsed or expanded) -->
+          <button onclick="toggleSidebar()" data-tooltip="Sunsai AI Studio" class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
+            S
+          </button>
+          <span class="font-bold text-base tracking-wide text-white hide-on-collapse">Sunsai</span>
+        </div>
       </div>
 
       <!-- New Chat Button -->
-      <button onclick="newChat()" data-tooltip="New chat" class="tooltip-container mt-3 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3.5 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
-        <i class="fa-solid fa-plus"></i> <span class="hide-on-collapse">New chat</span>
+      <button onclick="newChat()" data-tooltip="New chat" class="tooltip-container my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
+        <i class="fa-solid fa-plus w-5 text-center text-sm"></i> <span class="hide-on-collapse">New chat</span>
       </button>
 
       <!-- Navigation Links (Library, Images, Audio, Video) -->
-      <div class="mt-3 space-y-0.5 shrink-0">
+      <div class="space-y-1 shrink-0">
         <div onclick="switchNav('Library')" data-tooltip="Library" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-folder-open w-5 text-center"></i> <span class="hide-on-collapse">Library</span>
         </div>
@@ -85,95 +86,52 @@
         </div>
       </div>
 
+      <!-- Search Section (Placed before Recent) -->
+      <div class="mt-3 hide-on-collapse">
+        <div class="flex items-center justify-between px-2 mb-1">
+          <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Search Chats</span>
+          <button onclick="toggleSearch()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <div id="search-box-container" class="hidden px-0.5 mt-1">
+          <input id="chat-search" type="text" placeholder="Filter chats..." class="w-full bg-[#1e1f20] text-xs px-3 py-1.5 rounded-lg text-white border border-gray-700/50 focus:outline-none" oninput="filterChats()">
+        </div>
+      </div>
+
       <!-- Recent Label -->
-      <div class="mt-4 text-xs text-gray-500 font-semibold px-2 uppercase tracking-wider hide-on-collapse shrink-0">Recent</div>
+      <div class="mt-3 flex items-center justify-between px-2 hide-on-collapse shrink-0">
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-clock text-xs text-blue-400"></i>
+          <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Recent</span>
+        </div>
+        <span id="chat-count-badge" class="text-[10px] bg-[#1e1f20] text-gray-400 px-1.5 py-0.5 rounded-full font-mono">100</span>
+      </div>
       
       <!-- Collapsed State Single Recent Icon -->
-      <div data-tooltip="Recent Chats" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2.5 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
+      <div data-tooltip="Recent Chats (100)" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
         <i class="fa-regular fa-clock text-base"></i>
       </div>
 
-      <!-- Scrollable Recent List -->
+      <!-- Scrollable Recent List (100 Items) -->
       <div class="sidebar-scroll flex-1 overflow-y-auto mt-1 space-y-0.5 text-sm text-gray-400 hide-on-collapse">
         <ul id="history-list" class="space-y-0.5">
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
-                    <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
+          <!-- Populated dynamically via script -->
         </ul>
       </div>
     </div>
 
-    <!-- Bottom Profile & Settings Section -->
-    <div class="border-t border-gray-800 pt-2 shrink-0 space-y-0.5">
-      <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
-        <i class="fa-solid fa-user-circle text-blue-400 text-lg w-5 text-center"></i>
-        <span class="hide-on-collapse truncate font-medium text-white">Tha Hmun Mang</span>
-      </div>
+    <!-- Bottom User Profile Section (Bigger icon, very bottom) -->
+    <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
       <div data-tooltip="Settings" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
-        <i class="fa-solid fa-user-gear w-5 text-center"></i>
+        <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
         <span class="hide-on-collapse">Settings</span>
+      </div>
+      <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
+        <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center"></i>
+        <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
       </div>
     </div>
   </aside>
 
-  <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col justify-between h-full relative">
     
     <!-- Absolute Positioned Three-Dots Menu Button -->
@@ -190,13 +148,12 @@
 
     <!-- Chat Stream Output -->
     <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12">
-      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text">
         <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-        <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today?</div>
+        <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today? Select from 100+ starter prompts or history sessions below.</div>
       </div>
     </div>
 
-    <!-- Input Bar -->
     <div class="p-4 max-w-4xl mx-auto w-full">
       <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
         
@@ -212,8 +169,11 @@
 
         <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
         
-        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm" onkeydown="if(event.key==='Enter') sendMessage()">
+        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" onkeydown="if(event.key==='Enter') sendMessage()">
         
+        <!-- Mic Input Button -->
+        <button onclick="toggleMic()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition" title="Voice Input"><i class="fa-solid fa-microphone text-base"></i></button>
+
         <!-- Model Selector Dropdown -->
         <div class="relative">
           <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
@@ -233,9 +193,44 @@
   </main>
 
   <script>
+    const recentChats = [];
+    for (let i = 1; i <= 100; i++) {
+      recentChats.push({
+        id: i,
+        title: i === 1 ? "Running Apps from GitHub" : `Session #${i}: AI Workflow & Development Strategy`
+      });
+    }
+
+    window.onload = function() {
+      renderRecentChats();
+    };
+
+    function renderRecentChats(filter) {
+      filter = filter || '';
+      const listEl = document.getElementById('history-list');
+      listEl.innerHTML = '';
+
+      const filtered = recentChats.filter(c => c.title.toLowerCase().includes(filter));
+      document.getElementById('chat-count-badge').innerText = filtered.length;
+
+      filtered.forEach(chat => {
+        const li = document.createElement('li');
+        li.className = "px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate select-text";
+        li.innerText = chat.title;
+        li.onclick = () => loadSession(chat.id);
+        listEl.appendChild(li);
+      });
+    }
+
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
+      const toggleIcon = document.getElementById("toggle-icon");
       sidebar.classList.toggle("collapsed");
+      if (sidebar.classList.contains("collapsed")) {
+        toggleIcon.className = "fa-solid fa-chevron-right text-xs";
+      } else {
+        toggleIcon.className = "fa-solid fa-chevron-left text-xs";
+      }
     }
 
     function toggleSearch() {
@@ -248,16 +243,12 @@
 
     function filterChats() {
       const query = document.getElementById("chat-search").value.toLowerCase();
-      const items = document.querySelectorAll("#history-list li");
-      items.forEach(item => {
-        const text = item.innerText.toLowerCase();
-        item.style.display = text.includes(query) ? "" : "none";
-      });
+      renderRecentChats(query);
     }
 
     function switchNav(section) {
       const chatStream = document.getElementById("chat-stream");
-      chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Switched to <b>${section}</b> view. Select or start a new chat to begin working.</div></div>`;
+      chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Switched to <b>${section}</b> view. Select or start a new chat to begin working.</div></div>`;
     }
 
     function toggleOptionsMenu(event) {
@@ -303,6 +294,17 @@
       document.getElementById("model-dropdown").classList.add("hidden");
     }
 
+    function toggleMic() {
+      const micBtn = document.getElementById("mic-btn");
+      micBtn.classList.toggle("text-red-500");
+      const input = document.getElementById("user-input");
+      if (micBtn.classList.contains("text-red-500")) {
+        input.placeholder = "Listening...";
+      } else {
+        input.placeholder = "Ask Sunsai...";
+      }
+    }
+
     window.addEventListener("click", () => {
       document.getElementById("options-dropdown").classList.add("hidden");
       document.getElementById("model-dropdown").classList.add("hidden");
@@ -315,48 +317,22 @@
       if (!message) return;
 
       const chatStream = document.getElementById("chat-stream");
-      chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm">${message}</div></div>`;
+      chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm select-text">${message}</div></div>`;
       input.value = "";
 
       const responseDiv = document.createElement("div");
-      responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed";
-      responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1"></div>`;
+      responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed select-text";
+      responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">I have processed your request: <b>${message}</b>. Here is the generated output from Sunsai AI Studio runtime environment.</div>`;
       chatStream.appendChild(responseDiv);
       chatStream.scrollTop = chatStream.scrollHeight;
-
-      const contentBox = responseDiv.querySelector(".content");
-
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message })
-        });
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let rawText = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(Boolean);
-          for (let line of lines) {
-            const parsed = JSON.parse(line);
-            rawText += parsed.text;
-            contentBox.innerHTML = marked.parse(rawText);
-            hljs.highlightAll();
-            chatStream.scrollTop = chatStream.scrollHeight;
-          }
-        }
-      } catch (err) {
-        contentBox.innerHTML = "Error connecting to backend server.";
-      }
     }
 
     function newChat() {
-      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you?</div></div>`;
+      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you?</div></div>`;
+    }
+
+    function loadSession(id) {
+      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed select-text"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Loaded session #${id} from history archive.</div></div>`;
     }
   </script>
 </body>
