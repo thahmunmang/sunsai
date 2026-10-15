@@ -11,118 +11,236 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; }
-    .sidebar { background-color: #131314; width: 260px; }
+    .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
+    .sidebar.collapsed { width: 72px; }
+    .sidebar.collapsed .hide-on-collapse { display: none !important; }
+    .sidebar.collapsed .show-on-collapse { display: flex !important; }
+    .show-on-collapse { display: none; }
     .chat-container { background-color: #0e0e10; }
     .input-box { background-color: #1e1f20; border-radius: 28px; }
     pre code { border-radius: 8px; font-family: 'Consolas', monospace; }
+    /* Custom Scrollbar for Sidebar */
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2b2d; border-radius: 4px; }
   </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="flex h-screen overflow-hidden relative">
 
   <!-- Sidebar -->
-  <aside class="sidebar flex flex-col justify-between p-3 border-r border-gray-800">
-    <div>
-      <div class="flex items-center gap-3 px-3 py-2">
-        <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
-        <span class="font-bold text-lg tracking-wide text-white">Sunsai</span>
+  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
+    <div class="flex flex-col h-full overflow-hidden">
+      <!-- Top header with toggle & search -->
+      <div class="flex items-center justify-between px-2 py-2">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
+          <span class="font-bold text-lg tracking-wide text-white hide-on-collapse">Sunsai</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSearch()" class="text-gray-400 hover:text-white hide-on-collapse p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Search chats"><i class="fa-solid fa-magnifying-glass text-sm"></i></button>
+          <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Toggle Sidebar"><i class="fa-solid fa-bars text-sm"></i></button>
+        </div>
       </div>
-      <button onclick="newChat()" class="mt-4 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-4 py-3 rounded-full text-sm font-medium transition">
-        <i class="fa-solid fa-plus"></i> New chat
+
+      <!-- Search Box (Hidden by default) -->
+      <div id="search-box-container" class="hidden px-2 mt-2 hide-on-collapse">
+        <input id="chat-search" type="text" placeholder="Search chats..." class="w-full bg-[#1e1f20] text-xs px-3 py-2 rounded-lg text-white border border-gray-700/50 focus:outline-none" oninput="filterChats()">
+      </div>
+
+      <!-- New Chat Button -->
+      <button onclick="newChat()" class="mt-4 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-4 py-3 rounded-full text-sm font-medium transition shrink-0">
+        <i class="fa-solid fa-plus"></i> <span class="hide-on-collapse">New chat</span>
       </button>
-      <div class="mt-6 text-xs text-gray-500 font-semibold px-3 uppercase tracking-wider">Recent</div>
-      <ul id="history-list" class="mt-2 space-y-1 text-sm text-gray-400">
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-        <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
-      </ul>
+
+      <!-- Navigation Links (Library, Images, Audio, Video) -->
+      <div class="mt-4 space-y-1 shrink-0">
+        <div onclick="switchNav('Library')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+          <i class="fa-solid fa-folder-open w-5 text-center"></i> <span class="hide-on-collapse">Library</span>
+        </div>
+        <div onclick="switchNav('Images')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+          <i class="fa-solid fa-image w-5 text-center"></i> <span class="hide-on-collapse">Images</span>
+        </div>
+        <div onclick="switchNav('Audio')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+          <i class="fa-solid fa-headphones w-5 text-center"></i> <span class="hide-on-collapse">Audio</span>
+        </div>
+        <div onclick="switchNav('Video')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+          <i class="fa-solid fa-video w-5 text-center"></i> <span class="hide-on-collapse">Video</span>
+        </div>
+      </div>
+
+      <!-- Recent Label -->
+      <div class="mt-6 text-xs text-gray-500 font-semibold px-3 uppercase tracking-wider hide-on-collapse shrink-0">Recent</div>
+      
+      <!-- Scrollable Recent List -->
+      <div class="sidebar-scroll flex-1 overflow-y-auto mt-2 space-y-1 text-sm text-gray-400">
+        <ul id="history-list" class="space-y-1">
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">Running Apps from GitHub</span></li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">English-Hakha Dictionary Extraction</span></li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">Hakha Chin SFT Token Requirements</span></li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">LLM Fine-Tuning Methods</span></li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">FastAPI Backend Setup</span></li>
+        </ul>
+      </div>
     </div>
-    <div class="border-t border-gray-800 pt-3">
+
+    <!-- Bottom Profile & Settings Section -->
+    <div class="border-t border-gray-800 pt-3 shrink-0 space-y-1">
       <div class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer">
-        <i class="fa-solid fa-user-gear"></i>
-        <span>Settings</span>
+        <i class="fa-solid fa-user-circle text-blue-400 text-lg w-5 text-center"></i>
+        <span class="hide-on-collapse truncate font-medium text-white">Tha Hmun Mang</span>
+      </div>
+      <div class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer">
+        <i class="fa-solid fa-user-gear w-5 text-center"></i>
+        <span class="hide-on-collapse">Settings</span>
       </div>
     </div>
   </aside>
 
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col justify-between h-full relative">
-    <!-- Header Bar -->
-    <header class="flex items-center justify-between px-6 py-3">
-      <button class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-full font-semibold flex items-center gap-2">
-        <i class="fa-solid fa-bolt"></i> Upgrade
+    
+    <!-- Absolute Positioned Three-Dots Menu Button -->
+    <div class="absolute top-4 right-6 z-10">
+      <button onclick="toggleOptionsMenu(event)" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-[#1e1f20] transition">
+        <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
       </button>
-    </header>
+      <!-- Dropdown Menu -->
+      <div id="options-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-sm text-gray-300">
+        <div onclick="menuAction('share')" class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-2.5"><i class="fa-solid fa-share-nodes text-xs"></i> Share chat</div>
+        <div onclick="menuAction('pdf')" class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-2.5"><i class="fa-solid fa-file-pdf text-xs"></i> Download as PDF</div>
+      </div>
+    </div>
 
     <!-- Chat Stream Output -->
-    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full">
-      <!-- Messages inject dynamically here -->
+    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12">
+      <!-- Welcome message or dynamic messages inject here -->
+      <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+        <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+        <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today?</div>
+      </div>
     </div>
 
     <!-- Input Bar -->
     <div class="p-4 max-w-4xl mx-auto w-full">
-      <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50">
-        <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>
+      <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
+        
+        <!-- Attachment Popup Menu -->
+        <div id="attachment-menu" class="hidden absolute bottom-14 left-0 w-52 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-2 text-sm text-gray-300">
+          <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+            <i class="fa-solid fa-image text-blue-400"></i> Upload Image <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+          </label>
+          <label class="px-4 py-2.5 hover:bg-[#27272a] cursor-pointer flex items-center gap-3">
+            <i class="fa-solid fa-file-lines text-green-400"></i> Upload Document <input type="file" class="hidden" onchange="handleFileSelect(event)">
+          </label>
+        </div>
+
+        <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
+        
         <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm" onkeydown="if(event.key==='Enter') sendMessage()">
-            <div class="flex items-center gap-2 text-sm font-medium text-gray-300">
-              <span>Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-            </div>
-        <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300"><i class="fa-solid fa-paper-plane"></i></button>
+        
+        <!-- Model Selector Dropdown -->
+        <div class="relative">
+          <button onclick="toggleModelDropdown(event)" class="flex items-center gap-1.5 text-xs font-medium text-gray-300 bg-[#282a2c] hover:bg-[#323538] px-3 py-1.5 rounded-full transition">
+            <span id="selected-model">Sunsai Auto</span> <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+          </button>
+          <div id="model-dropdown" class="hidden absolute right-0 bottom-8 w-36 bg-[#18181b] border border-gray-800 rounded-xl shadow-2xl py-1 text-xs text-gray-300">
+            <div onclick="selectModel('Super')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Super</div>
+            <div onclick="selectModel('Normal')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Normal</div>
+            <div onclick="selectModel('Free')" class="px-3 py-2 hover:bg-[#27272a] cursor-pointer">Free</div>
+          </div>
+        </div>
+
+        <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
       </div>
       <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
     </div>
   </main>
 
   <script>
+    // Sidebar Collapse / Expand Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("collapsed");
+    }
+
+    // Search Toggle
+    function toggleSearch() {
+      const searchBox = document.getElementById("search-box-container");
+      searchBox.classList.toggle("hidden");
+      if(!searchBox.classList.contains("hidden")) {
+        document.getElementById("chat-search").focus();
+      }
+    }
+
+    // Filter chat history
+    function filterChats() {
+      const query = document.getElementById("chat-search").value.toLowerCase();
+      const items = document.querySelectorAll("#history-list li");
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(query) ? "" : "none";
+      });
+    }
+
+    // Navigation Switcher
+    function switchNav(section) {
+      const chatStream = document.getElementById("chat-stream");
+      chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Switched to <b>${section}</b> view. Select or start a new chat to begin working.</div></div>`;
+    }
+
+    // Options Three-Dots Menu Toggle
+    function toggleOptionsMenu(event) {
+      event.stopPropagation();
+      const dropdown = document.getElementById("options-dropdown");
+      dropdown.classList.toggle("hidden");
+      document.getElementById("model-dropdown").classList.add("hidden");
+      document.getElementById("attachment-menu").classList.add("hidden");
+    }
+
+    function menuAction(action) {
+      alert(`Triggered action: ${action}`);
+      document.getElementById("options-dropdown").classList.add("hidden");
+    }
+
+    // Attachment Menu Toggle (+)
+    function toggleAttachmentMenu(event) {
+      event.stopPropagation();
+      const menu = document.getElementById("attachment-menu");
+      menu.classList.toggle("hidden");
+      document.getElementById("options-dropdown").classList.add("hidden");
+      document.getElementById("model-dropdown").classList.add("hidden");
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const input = document.getElementById("user-input");
+        input.value = `[Attached: ${file.name}]`;
+      }
+      document.getElementById("attachment-menu").classList.add("hidden");
+    }
+
+    // Model Selector Dropdown Toggle
+    function toggleModelDropdown(event) {
+      event.stopPropagation();
+      const dropdown = document.getElementById("model-dropdown");
+      dropdown.classList.toggle("hidden");
+      document.getElementById("options-dropdown").classList.add("hidden");
+      document.getElementById("attachment-menu").classList.add("hidden");
+    }
+
+    function selectModel(modelName) {
+      document.getElementById("selected-model").innerText = `Sunsai ${modelName}`;
+      document.getElementById("model-dropdown").classList.add("hidden");
+    }
+
+    // Close dropdowns when clicking outside
+    window.addEventListener("click", () => {
+      document.getElementById("options-dropdown").classList.add("hidden");
+      document.getElementById("model-dropdown").classList.add("hidden");
+      document.getElementById("attachment-menu").classList.add("hidden");
+    });
+
+    // Send Message Logic
     async function sendMessage() {
       const input = document.getElementById("user-input");
       const message = input.value.trim();
@@ -139,36 +257,41 @@
       responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed";
       responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1"></div>`;
       chatStream.appendChild(responseDiv);
+      chatStream.scrollTop = chatStream.scrollHeight;
 
       const contentBox = responseDiv.querySelector(".content");
 
-      // Fetch streaming response
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let rawText = "";
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let rawText = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(Boolean);
-        for (let line of lines) {
-          const parsed = JSON.parse(line);
-          rawText += parsed.text;
-          contentBox.innerHTML = marked.parse(rawText);
-          hljs.highlightAll();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n").filter(Boolean);
+          for (let line of lines) {
+            const parsed = JSON.parse(line);
+            rawText += parsed.text;
+            contentBox.innerHTML = marked.parse(rawText);
+            hljs.highlightAll();
+            chatStream.scrollTop = chatStream.scrollHeight;
+          }
         }
+      } catch (err) {
+        contentBox.innerHTML = "Error connecting to backend server.";
       }
     }
 
     function newChat() {
-      document.getElementById("chat-stream").innerHTML = "";
+      document.getElementById("chat-stream").innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">New chat started. How can I assist you?</div></div>`;
     }
   </script>
 </body>
