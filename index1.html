@@ -73,7 +73,7 @@
 <body class="flex h-screen overflow-hidden relative">
 
   <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
-    <div class="flex flex-col h-full">
+    <div id="sidebar-inner" class="flex flex-col h-full overflow-hidden">
       
       <!-- Top Header: Sidebar On State -->
       <div class="flex items-center justify-between px-1.5 py-1 mb-2 hide-on-collapse">
@@ -174,19 +174,19 @@
       </div>
     </div>
 
-    <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
-      <div id="nav-Settings" onclick="switchNav('Settings')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
-        <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
-        <span class="hide-on-collapse">Settings</span>
-        <div class="tooltip-label">Settings</div>
+      <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
+        <div id="nav-Settings" onclick="switchNav('Settings')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+          <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
+          <span class="hide-on-collapse">Settings</span>
+          <div class="tooltip-label">Settings</div>
+        </div>
+        <div id="nav-Profile" onclick="switchNav('Profile')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+          <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-125"></i>
+          <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
+          <div class="tooltip-label">Tha Hmun Mang</div>
+        </div>
       </div>
-      <div id="nav-Profile" onclick="switchNav('Profile')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
-        <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-125"></i>
-        <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
-        <div class="tooltip-label">Tha Hmun Mang</div>
-      </div>
-    </div>
-  </aside>
+    </aside>
 
   <main class="flex-1 flex flex-col justify-between h-full relative">
     
@@ -300,7 +300,17 @@
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
+      const inner = document.getElementById("sidebar-inner");
       sidebar.classList.toggle("collapsed");
+      
+      // Toggle overflow-hidden only when sidebar is open vs collapsed so tooltips aren't clipped
+      if (sidebar.classList.contains("collapsed")) {
+        inner.classList.remove("overflow-hidden");
+        inner.classList.add("overflow-visible");
+      } else {
+        inner.classList.remove("overflow-visible");
+        inner.classList.add("overflow-hidden");
+      }
     }
 
     function toggleSearch() {
