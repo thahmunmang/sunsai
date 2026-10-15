@@ -28,27 +28,35 @@
     
     /* Tooltip styling - visible when collapsed next to icons */
     .tooltip-container { position: relative; }
-    .sidebar.collapsed .tooltip-container:hover::after {
-      content: attr(data-tooltip);
+    .sidebar.collapsed .tooltip-container:hover > .tooltip-label {
+      display: block;
+    }
+    .tooltip-label {
+      display: none;
       position: absolute;
-      left: 68px;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
       background: #27272a;
       color: #fff;
       padding: 5px 10px;
       font-size: 12px;
       border-radius: 6px;
       white-space: nowrap;
-      z-index: 60;
+      z-index: 100;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
       pointer-events: none;
     }
 
     /* Selectable Recent Chats in Collapsed Tooltip */
+    .sidebar.collapsed .recent-tooltip-wrapper:hover #recent-tooltip-box {
+      display: block;
+    }
     .sidebar.collapsed #recent-tooltip-box {
       display: none;
       position: absolute;
-      left: 68px;
-      bottom: 0;
+      left: calc(100% + 10px);
+      top: 0;
       width: 280px;
       max-height: 350px;
       background: #18181b;
@@ -59,9 +67,6 @@
       overflow-y: auto;
       padding: 8px;
       user-select: text;
-    }
-    .sidebar.collapsed .recent-tooltip-wrapper:hover #recent-tooltip-box {
-      display: block;
     }
   </style>
 </head>
@@ -78,39 +83,51 @@
           </div>
           <span class="font-bold text-base tracking-wide text-white">Sunsai</span>
         </div>
-        <button onclick="toggleSidebar()" data-tooltip="Toggle Sidebar" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition">
+        <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition" title="Toggle Sidebar">
           <i class="fa-solid fa-bars text-sm"></i>
         </button>
       </div>
 
       <!-- Top Header: Sidebar Off State (Hidden when open) -->
       <div class="show-on-collapse flex-col items-center gap-2.5 mb-3 px-1 py-1">
-        <div data-tooltip="Sunsai AI Studio" class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
+        <div class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
           S
+          <div class="tooltip-label">Sunsai AI Studio</div>
         </div>
-        <button onclick="toggleSidebar()" data-tooltip="Expand Sidebar" class="tooltip-container text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition mt-2">
+        <button onclick="toggleSidebar()" class="tooltip-container text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition mt-2">
           <i class="fa-solid fa-bars text-sm"></i>
+          <div class="tooltip-label">Expand Sidebar</div>
         </button>
       </div>
 
       <!-- New Chat Button (No permanent highlight) -->
-      <button onclick="newChat()" data-tooltip="New chat" class="tooltip-container my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
-        <i class="fa-solid fa-plus w-5 text-center text-sm"></i> <span class="hide-on-collapse">New chat</span>
+      <button onclick="newChat()" class="tooltip-container my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
+        <i class="fa-solid fa-plus w-5 text-center text-sm"></i> 
+        <span class="hide-on-collapse">New chat</span>
+        <div class="tooltip-label">New chat</div>
       </button>
 
       <!-- Nav Items -->
       <div class="space-y-1 shrink-0">
-        <div id="nav-Library" onclick="switchNav('Library')" data-tooltip="Library" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
-          <i class="fa-solid fa-folder-open w-5 text-center"></i> <span class="hide-on-collapse">Library</span>
+        <div id="nav-Library" onclick="switchNav('Library')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
+          <i class="fa-solid fa-folder-open w-5 text-center"></i> 
+          <span class="hide-on-collapse">Library</span>
+          <div class="tooltip-label">Library</div>
         </div>
-        <div id="nav-Images" onclick="switchNav('Images')" data-tooltip="Images" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
-          <i class="fa-solid fa-image w-5 text-center"></i> <span class="hide-on-collapse">Images</span>
+        <div id="nav-Images" onclick="switchNav('Images')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
+          <i class="fa-solid fa-image w-5 text-center"></i> 
+          <span class="hide-on-collapse">Images</span>
+          <div class="tooltip-label">Images</div>
         </div>
-        <div id="nav-Audio" onclick="switchNav('Audio')" data-tooltip="Audio" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
-          <i class="fa-solid fa-headphones w-5 text-center"></i> <span class="hide-on-collapse">Audio</span>
+        <div id="nav-Audio" onclick="switchNav('Audio')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
+          <i class="fa-solid fa-headphones w-5 text-center"></i> 
+          <span class="hide-on-collapse">Audio</span>
+          <div class="tooltip-label">Audio</div>
         </div>
-        <div id="nav-Video" onclick="switchNav('Video')" data-tooltip="Video" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
-          <i class="fa-solid fa-video w-5 text-center"></i> <span class="hide-on-collapse">Video</span>
+        <div id="nav-Video" onclick="switchNav('Video')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight transition">
+          <i class="fa-solid fa-video w-5 text-center"></i> 
+          <span class="hide-on-collapse">Video</span>
+          <div class="tooltip-label">Video</div>
         </div>
       </div>
 
@@ -135,8 +152,9 @@
       </div>
       
       <!-- Recent Icon when Sidebar is OFF (with Selectable Tooltip containing 100 recent chat list) -->
-      <div data-tooltip="Recent Chats" class="recent-tooltip-wrapper show-on-collapse relative items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
+      <div class="recent-tooltip-wrapper show-on-collapse relative items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight tooltip-container">
         <i class="fa-regular fa-clock text-base"></i>
+        <div class="tooltip-label">Recent Chats</div>
         <div id="recent-tooltip-box" class="space-y-1">
           <div class="text-xs font-semibold text-blue-400 px-2 py-1 border-b border-gray-800 flex justify-between items-center">
             <span>Recent Chats</span>
@@ -156,15 +174,16 @@
       </div>
     </div>
 
-    <!-- Bottom Profile & Settings Section -->
     <div class="border-t border-gray-800 pt-2 shrink-0 space-y-1">
-      <div id="nav-Settings" onclick="switchNav('Settings')" data-tooltip="Settings" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+      <div id="nav-Settings" onclick="switchNav('Settings')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
         <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
         <span class="hide-on-collapse">Settings</span>
+        <div class="tooltip-label">Settings</div>
       </div>
-      <div id="nav-Profile" onclick="switchNav('Profile')" data-tooltip="Tha Hmun Mang" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
+      <div id="nav-Profile" onclick="switchNav('Profile')" class="nav-item tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight transition">
         <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-125"></i>
         <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
+        <div class="tooltip-label">Tha Hmun Mang</div>
       </div>
     </div>
   </aside>
@@ -205,7 +224,7 @@
 
         <button onclick="toggleAttachmentMenu(event)" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-plus text-base"></i></button>
         
-        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" onkeydown="if(event.key==='Enter') sendMessage()">
+        <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" oninput="handleInputChange()" onkeydown="if(event.key==='Enter') sendMessage()">
         
         <!-- Microphone Voice Input Button -->
         <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition px-1" title="Voice Input">
@@ -223,7 +242,8 @@
           </div>
         </div>
 
-        <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
+        <!-- Send Button (Hidden when input is blank, shown when not blank) -->
+        <button id="send-btn" onclick="sendMessage()" class="hidden text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
       </div>
       <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
     </div>
@@ -356,6 +376,16 @@
     let recognition = null;
     let isListening = false;
 
+    function handleInputChange() {
+      const input = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send-btn");
+      if (input.value.trim().length > 0) {
+        sendBtn.classList.remove("hidden");
+      } else {
+        sendBtn.classList.add("hidden");
+      }
+    }
+
     function toggleVoiceInput() {
       const micBtn = document.getElementById("mic-btn");
       const input = document.getElementById("user-input");
@@ -425,6 +455,7 @@
       const chatStream = document.getElementById("chat-stream");
       chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm select-text">${message}</div></div>`;
       input.value = "";
+      handleInputChange(); // Hide send button again
 
       const responseDiv = document.createElement("div");
       responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed select-text";
