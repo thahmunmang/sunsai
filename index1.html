@@ -12,9 +12,11 @@
   <style>
     body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; }
     .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
-    .sidebar.collapsed { width: 72px; }
+    .sidebar.collapsed { width: 64px; padding: 6px 2px !important; }
     .sidebar.collapsed .hide-on-collapse { display: none !important; }
     .sidebar.collapsed .show-on-collapse { display: flex !important; }
+    .sidebar.collapsed .collapse-tight { padding: 4px 6px !important; justify-content: center !important; }
+    .sidebar.collapsed .collapse-tight i { margin-right: 0 !important; font-size: 15px; }
     .show-on-collapse { display: none; }
     .chat-container { background-color: #0e0e10; }
     .input-box { background-color: #1e1f20; border-radius: 28px; }
@@ -22,6 +24,22 @@
     /* Custom Scrollbar for Sidebar */
     .sidebar-scroll::-webkit-scrollbar { width: 4px; }
     .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2b2d; border-radius: 4px; }
+    
+    /* Tooltip styling */
+    .tooltip-container { position: relative; }
+    .sidebar.collapsed .tooltip-container:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 70px;
+      background: #27272a;
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 50;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden relative">
@@ -30,65 +48,70 @@
   <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
     <div class="flex flex-col h-full overflow-hidden">
       <!-- Top header with toggle & search -->
-      <div class="flex items-center justify-between px-2 py-2">
+      <div class="flex items-center justify-between px-1 py-1">
         <div class="flex items-center gap-3">
           <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
           <span class="font-bold text-lg tracking-wide text-white hide-on-collapse">Sunsai</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1">
           <button onclick="toggleSearch()" class="text-gray-400 hover:text-white hide-on-collapse p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Search chats"><i class="fa-solid fa-magnifying-glass text-sm"></i></button>
           <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20]" title="Toggle Sidebar"><i class="fa-solid fa-bars text-sm"></i></button>
         </div>
       </div>
 
       <!-- Search Box (Hidden by default) -->
-      <div id="search-box-container" class="hidden px-2 mt-2 hide-on-collapse">
+      <div id="search-box-container" class="hidden px-1 mt-2 hide-on-collapse">
         <input id="chat-search" type="text" placeholder="Search chats..." class="w-full bg-[#1e1f20] text-xs px-3 py-2 rounded-lg text-white border border-gray-700/50 focus:outline-none" oninput="filterChats()">
       </div>
 
       <!-- New Chat Button -->
-      <button onclick="newChat()" class="mt-4 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-4 py-3 rounded-full text-sm font-medium transition shrink-0">
+      <button onclick="newChat()" data-tooltip="New chat" class="tooltip-container mt-3 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3.5 py-2.5 rounded-full text-sm font-medium transition collapse-tight shrink-0">
         <i class="fa-solid fa-plus"></i> <span class="hide-on-collapse">New chat</span>
       </button>
 
       <!-- Navigation Links (Library, Images, Audio, Video) -->
-      <div class="mt-4 space-y-1 shrink-0">
-        <div onclick="switchNav('Library')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+      <div class="mt-3 space-y-0.5 shrink-0">
+        <div onclick="switchNav('Library')" data-tooltip="Library" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-folder-open w-5 text-center"></i> <span class="hide-on-collapse">Library</span>
         </div>
-        <div onclick="switchNav('Images')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+        <div onclick="switchNav('Images')" data-tooltip="Images" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-image w-5 text-center"></i> <span class="hide-on-collapse">Images</span>
         </div>
-        <div onclick="switchNav('Audio')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+        <div onclick="switchNav('Audio')" data-tooltip="Audio" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-headphones w-5 text-center"></i> <span class="hide-on-collapse">Audio</span>
         </div>
-        <div onclick="switchNav('Video')" class="flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300">
+        <div onclick="switchNav('Video')" data-tooltip="Video" class="tooltip-container flex items-center gap-3 px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-sm text-gray-300 collapse-tight">
           <i class="fa-solid fa-video w-5 text-center"></i> <span class="hide-on-collapse">Video</span>
         </div>
       </div>
 
       <!-- Recent Label -->
-      <div class="mt-6 text-xs text-gray-500 font-semibold px-3 uppercase tracking-wider hide-on-collapse shrink-0">Recent</div>
+      <div class="mt-4 text-xs text-gray-500 font-semibold px-2 uppercase tracking-wider hide-on-collapse shrink-0">Recent</div>
       
+      <!-- Collapsed State Single Recent Icon -->
+      <div data-tooltip="Recent Chats" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2.5 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
+        <i class="fa-regular fa-clock text-base"></i>
+      </div>
+
       <!-- Scrollable Recent List -->
-      <div class="sidebar-scroll flex-1 overflow-y-auto mt-2 space-y-1 text-sm text-gray-400">
-        <ul id="history-list" class="space-y-1">
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">Running Apps from GitHub</span></li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">English-Hakha Dictionary Extraction</span></li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">Hakha Chin SFT Token Requirements</span></li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">LLM Fine-Tuning Methods</span></li>
-          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate flex items-center gap-3"><i class="fa-regular fa-clock show-on-collapse text-base"></i><span class="hide-on-collapse">FastAPI Backend Setup</span></li>
+      <div class="sidebar-scroll flex-1 overflow-y-auto mt-1 space-y-0.5 text-sm text-gray-400 hide-on-collapse">
+        <ul id="history-list" class="space-y-0.5">
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Running Apps from GitHub</li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">English-Hakha Dictionary Extraction</li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">Hakha Chin SFT Token Requirements</li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">LLM Fine-Tuning Methods</li>
+          <li class="px-3 py-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer truncate">FastAPI Backend Setup</li>
         </ul>
       </div>
     </div>
 
     <!-- Bottom Profile & Settings Section -->
-    <div class="border-t border-gray-800 pt-3 shrink-0 space-y-1">
-      <div class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer">
+    <div class="border-t border-gray-800 pt-2 shrink-0 space-y-0.5">
+      <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
         <i class="fa-solid fa-user-circle text-blue-400 text-lg w-5 text-center"></i>
         <span class="hide-on-collapse truncate font-medium text-white">Tha Hmun Mang</span>
       </div>
-      <div class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer">
+      <div data-tooltip="Settings" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
         <i class="fa-solid fa-user-gear w-5 text-center"></i>
         <span class="hide-on-collapse">Settings</span>
       </div>
@@ -112,7 +135,6 @@
 
     <!-- Chat Stream Output -->
     <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12">
-      <!-- Welcome message or dynamic messages inject here -->
       <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
         <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
         <div class="content flex-1">Hello! I am Sunsai AI. How can I help you build or create today?</div>
@@ -156,13 +178,11 @@
   </main>
 
   <script>
-    // Sidebar Collapse / Expand Toggle
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
       sidebar.classList.toggle("collapsed");
     }
 
-    // Search Toggle
     function toggleSearch() {
       const searchBox = document.getElementById("search-box-container");
       searchBox.classList.toggle("hidden");
@@ -171,7 +191,6 @@
       }
     }
 
-    // Filter chat history
     function filterChats() {
       const query = document.getElementById("chat-search").value.toLowerCase();
       const items = document.querySelectorAll("#history-list li");
@@ -181,13 +200,11 @@
       });
     }
 
-    // Navigation Switcher
     function switchNav(section) {
       const chatStream = document.getElementById("chat-stream");
       chatStream.innerHTML = `<div class="flex gap-3 text-sm text-gray-200 leading-relaxed"><i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Switched to <b>${section}</b> view. Select or start a new chat to begin working.</div></div>`;
     }
 
-    // Options Three-Dots Menu Toggle
     function toggleOptionsMenu(event) {
       event.stopPropagation();
       const dropdown = document.getElementById("options-dropdown");
@@ -201,7 +218,6 @@
       document.getElementById("options-dropdown").classList.add("hidden");
     }
 
-    // Attachment Menu Toggle (+)
     function toggleAttachmentMenu(event) {
       event.stopPropagation();
       const menu = document.getElementById("attachment-menu");
@@ -219,7 +235,6 @@
       document.getElementById("attachment-menu").classList.add("hidden");
     }
 
-    // Model Selector Dropdown Toggle
     function toggleModelDropdown(event) {
       event.stopPropagation();
       const dropdown = document.getElementById("model-dropdown");
@@ -233,26 +248,21 @@
       document.getElementById("model-dropdown").classList.add("hidden");
     }
 
-    // Close dropdowns when clicking outside
     window.addEventListener("click", () => {
       document.getElementById("options-dropdown").classList.add("hidden");
       document.getElementById("model-dropdown").classList.add("hidden");
       document.getElementById("attachment-menu").classList.add("hidden");
     });
 
-    // Send Message Logic
     async function sendMessage() {
       const input = document.getElementById("user-input");
       const message = input.value.trim();
       if (!message) return;
 
       const chatStream = document.getElementById("chat-stream");
-      
-      // Append User Bubble
       chatStream.innerHTML += `<div class="flex justify-end"><div class="bg-[#282a2c] text-gray-200 px-4 py-2.5 rounded-2xl max-w-xl text-sm">${message}</div></div>`;
       input.value = "";
 
-      // Append Assistant Container
       const responseDiv = document.createElement("div");
       responseDiv.className = "flex gap-3 text-sm text-gray-200 leading-relaxed";
       responseDiv.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1"></div>`;
