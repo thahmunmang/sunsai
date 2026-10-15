@@ -61,12 +61,12 @@
         </button>
       </div>
 
-      <!-- Top Header: Sidebar Off State (Icon S on top, Hamburger below it) -->
-      <div class="show-on-collapse flex flex-col items-center gap-2.5 mb-3 px-1 py-1">
+      <!-- Top Header: Sidebar Off State (Icon S on top, Hamburger below it) - Hidden when Sidebar is On -->
+      <div class="show-on-collapse flex-col items-center gap-2.5 mb-3 px-1 py-1">
         <div data-tooltip="Sunsai AI Studio" class="tooltip-container w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm tracking-wider shrink-0 border border-blue-500/30">
           S
         </div>
-        <button onclick="toggleSidebar()" data-tooltip="Expand Sidebar" class="tooltip-container text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition">
+        <button onclick="toggleSidebar()" data-tooltip="Expand Sidebar" class="tooltip-container text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition mt-2">
           <i class="fa-solid fa-bars text-sm"></i>
         </button>
       </div>
@@ -108,9 +108,9 @@
         <span id="chat-count-badge" class="text-[10px] bg-[#1e1f20] text-gray-400 px-1.5 py-0.5 rounded-full font-mono">100</span>
       </div>
       
-      <div data-tooltip="Recent Chats (100)" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
+      <!-- <div data-tooltip="Recent Chats (100)" class="tooltip-container show-on-collapse flex items-center justify-center px-2 py-2 mt-2 hover:bg-[#1e1f20] rounded-lg cursor-pointer text-gray-400 collapse-tight">
         <i class="fa-regular fa-clock text-base"></i>
-      </div>
+      </div> -->
 
       <div class="sidebar-scroll flex-1 overflow-y-auto mt-1 space-y-0.5 text-sm text-gray-400 hide-on-collapse">
         <ul id="history-list" class="space-y-0.5">
@@ -124,9 +124,9 @@
         <i class="fa-solid fa-user-gear w-5 text-center text-base"></i>
         <span class="hide-on-collapse">Settings</span>
       </div>
-      <!-- User profile at the very bottom, sized slightly larger -->
-      <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
-        <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center"></i>
+      <!-- User profile at the very bottom, sized noticeably larger than other icons -->
+      <div data-tooltip="Tha Hmun Mang" class="tooltip-container flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-[#1e1f20] rounded-lg cursor-pointer collapse-tight">
+        <i class="fa-solid fa-user-circle text-blue-400 text-3xl w-5 text-center flex items-center justify-center scale-110"></i>
         <span class="hide-on-collapse truncate font-medium text-white text-base">Tha Hmun Mang</span>
       </div>
     </div>
@@ -167,8 +167,8 @@
         
         <input id="user-input" type="text" placeholder="Ask Sunsai..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" onkeydown="if(event.key==='Enter') sendMessage()">
         
-        <!-- Functional Voice Input Microphone Button -->
-        <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition" title="Voice Input">
+        <!-- Functional Voice Input Microphone Button next to Model Selector -->
+        <button onclick="toggleVoiceInput()" id="mic-btn" class="text-gray-400 hover:text-blue-400 transition px-1" title="Voice Input">
           <i class="fa-solid fa-microphone text-base"></i>
         </button>
 
@@ -343,7 +343,7 @@
         try {
           recognition.stop();
         } catch (e) {
-          // Ignore if already stopped
+          // Ignore
         }
         isListening = false;
         micBtn.classList.remove("text-red-500", "animate-pulse");
