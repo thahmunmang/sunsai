@@ -610,7 +610,6 @@
       ]
     };
 
-    // Track active navigation tab to return after settings save
     let activeNavTab = 'Chat';
     let previousNavTab = 'Chat';
 
@@ -1232,6 +1231,163 @@
       showToast('Listening for voice input...');
     }
 
+    function copyMessageContent(btnEl) {
+      const msgBubble = btnEl.closest('.group, .flex').querySelector('.msg-text-content');
+      if (msgBubble) {
+        copyToClipboard(msgBubble.innerText);
+      }
+    }
+
+    function editUserQuery(btnEl) {
+      const messageRow = btnEl.closest('.user-message-row');
+      const bubble = messageRow.querySelector('.user-bubble');
+      const currentText = bubble.innerText;
+
+      messageRow.innerHTML = `
+        <div class="bg-[#1e1f20] border border-blue-500/50 p-3 rounded-2xl max-w-xl w-full space-y-2">
+          <textarea class="edit-query-input w-full bg-transparent text-white text-sm focus:outline-none resize-none" rows="2">${currentText}</textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="cancelEditQuery(this, \`${currentText.replace(/`/g, '\\`')}\`)" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-xs rounded-lg text-white">Cancel</button>
+            <button onclick="submitEditedQuery(this)" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs rounded-lg text-white">Save & Submit</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function cancelEditQuery(btnEl, originalText) {
+      const messageRow = btnEl.closest('.user-message-row');
+      messageRow.innerHTML = `
+        <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group">
+          <div class="msg-text-content">${originalText}</div>
+          <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
+            <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function submitEditedQuery(btnEl) {
+      const messageRow = btnEl.closest('.user-message-row');
+      const textarea = messageRow.querySelector('.edit-query-input');
+      const newText = textarea ? textarea.value.trim() : '';
+      if (!newText) return;
+
+      // Report everything below this edit user query and generate new response
+      let nextElem = messageRow.nextElementSibling;
+      while (nextElem) {
+        const toRemove = nextElem;
+        nextElem = nextElem.nextElementSibling;
+        toRemove.remove();
+      }
+
+      messageRow.innerHTML = `
+        <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group user-bubble">
+          <div class="msg-text-content">${newText}</div>
+          <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
+            <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+          </div>
+        </div>
+      `;
+
+      const stream = document.getElementById('chat-stream');
+      if (stream) {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed ai-message-row';
+        aiMsg.innerHTML = `
+          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+          <div class="content flex-1 space-y-2 relative group">
+            <div class="msg-text-content">Regenerated response for: "${newText}". Here is the updated output based on your revised instructions.</div>
+            <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+              <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+              <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+              <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+            </div>
+          </div>
+        `;
+        stream.appendChild(aiMsg);
+        stream.scrollTop = stream.scrollHeight;
+      }
+    }
+
+    function handleThumbUp(btnEl) {
+      btnEl.innerHTML = `<i class="fa-solid fa-thumbs-up text-blue-400"></i>`;
+      showToast('Thank you for your positive feedback!');
+    }
+
+    function handleThumbDown(btnEl) {
+      // Close any existing thumbdown popups
+      document.querySelectorAll('.thumbdown-popup').forEach(el => el.remove());
+
+      const popup = document.createElement('div');
+      popup.className = 'thumbdown-popup absolute left-0 bottom-8 bg-[#18181b] border border-gray-800 p-3 rounded-xl shadow-2xl z-30 w-56 text-xs text-gray-300 space-y-2';
+      popup.innerHTML = `
+        <div class="font-semibold text-white">Why was this response unhelpful?</div>
+        <div onclick="submitThumbDownReason(this, 'Inaccurate / False')" class="hover:bg-[#27272a] p-1.5 rounded cursor-pointer">Inaccurate / False</div>
+        <div onclick="submitThumbDownReason(this, 'Incomplete answer')" class="hover:bg-[#27272a] p-1.5 rounded cursor-pointer">Incomplete answer</div>
+        <div onclick="submitThumbDownReason(this, 'Not polite / Harful')" class="hover:bg-[#27272a] p-1.5 rounded cursor-pointer">Not polite / Harmful</div>
+        <div onclick="submitThumbDownReason(this, 'Other reason')" class="hover:bg-[#27272a] p-1.5 rounded cursor-pointer">Other reason</div>
+      `;
+      btnEl.appendChild(popup);
+    }
+
+    function submitThumbDownReason(elem, reason) {
+      const popup = elem.closest('.thumbdown-popup');
+      const btnContainer = popup.closest('div');
+      const thumbDownBtn = btnContainer.querySelector('.fa-thumbs-down').closest('button');
+      thumbDownBtn.innerHTML = `<i class="fa-solid fa-thumbs-down text-rose-400"></i>`;
+      popup.remove();
+      showToast(`Feedback noted: ${reason}. Thank you!`);
+    }
+
+    function editAiResponse(btnEl) {
+      const contentDiv = btnEl.closest('.content');
+      const msgBubble = contentDiv.querySelector('.msg-text-content');
+      const currentText = msgBubble.innerText;
+
+      contentDiv.innerHTML = `
+        <div class="bg-[#1e1f20] border border-gray-700 p-3 rounded-2xl w-full space-y-2">
+          <textarea class="edit-ai-input w-full bg-transparent text-white text-sm focus:outline-none resize-none" rows="3">${currentText}</textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="cancelEditAi(this, \`${currentText.replace(/`/g, '\\`')}\`)" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-xs rounded-lg text-white">Cancel</button>
+            <button onclick="saveEditAi(this)" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs rounded-lg text-white">Save</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function cancelEditAi(btnEl, originalText) {
+      const contentDiv = btnEl.closest('.content');
+      contentDiv.innerHTML = `
+        <div class="msg-text-content">${originalText}</div>
+        <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+          <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+          <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+          <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+        </div>
+      `;
+    }
+
+    function saveEditAi(btnEl) {
+      const contentDiv = btnEl.closest('.content');
+      const textarea = contentDiv.querySelector('.edit-ai-input');
+      const newText = textarea ? textarea.value.trim() : '';
+
+      contentDiv.innerHTML = `
+        <div class="msg-text-content">${newText}</div>
+        <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+          <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+          <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+          <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+        </div>
+      `;
+      showToast('AI response updated successfully');
+    }
+
     function sendMessage() {
       const input = document.getElementById('user-input');
       if (!input || !input.value.trim()) return;
@@ -1239,13 +1395,32 @@
       const stream = document.getElementById('chat-stream');
       if (stream) {
         const userMsg = document.createElement('div');
-        userMsg.className = 'flex gap-3 text-sm text-white justify-end';
-        userMsg.innerHTML = `<div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl">${input.value}</div>`;
+        userMsg.className = 'flex gap-3 text-sm text-white justify-end user-message-row';
+        userMsg.innerHTML = `
+          <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group user-bubble">
+            <div class="msg-text-content">${input.value}</div>
+            <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
+              <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+            </div>
+          </div>
+        `;
         stream.appendChild(userMsg);
 
         const aiMsg = document.createElement('div');
-        aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed';
-        aiMsg.innerHTML = `<i class="fa-solid fa-sparkles text-blue-400 mt-1"></i><div class="content flex-1">Thank you for your message. Processing request...</div>`;
+        aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed ai-message-row';
+        aiMsg.innerHTML = `
+          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+          <div class="content flex-1 space-y-2 relative group">
+            <div class="msg-text-content">Thank you for your message. Processing request...</div>
+            <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+              <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+              <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+              <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+            </div>
+          </div>
+        `;
         stream.appendChild(aiMsg);
 
         stream.scrollTop = stream.scrollHeight;
@@ -1262,30 +1437,43 @@
       if (stream) {
         stream.innerHTML = `
           <!-- User Query -->
-          <div class="flex gap-3 text-sm text-white justify-end">
-            <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl">
-              Can you give me a comprehensive overview and code template regarding <strong>${title}</strong>?
+          <div class="flex gap-3 text-sm text-white justify-end user-message-row">
+            <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group user-bubble">
+              <div class="msg-text-content">Can you give me a comprehensive overview and code template regarding <strong>${title}</strong>?</div>
+              <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
+                <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+              </div>
             </div>
           </div>
 
           <!-- AI Response -->
-          <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+          <div class="flex gap-3 text-sm text-gray-200 leading-relaxed ai-message-row">
             <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-            <div class="content flex-1 space-y-3">
-              <p>Here is a detailed breakdown and sample implementation for <strong>${title}</strong>:</p>
-              
-              <div class="bg-[#18181b] border border-gray-800 rounded-xl p-4 font-mono text-xs text-gray-300 space-y-1">
-                <div class="text-gray-500">// Sample Configuration & Execution for ${title}</div>
-                <div><span class="text-blue-400">import</span> { SunsaiStudio } <span class="text-blue-400">from</span> <span class="text-emerald-400">'@sunsai/ai-core'</span>;</div>
-                <br>
-                <div><span class="text-purple-400">async function</span> <span class="text-amber-300">executeWorkflow</span>() {</div>
-                <div class="pl-4"><span class="text-blue-400">const</span> studio = <span class="text-purple-400">new</span> SunsaiStudio({ model: <span class="text-emerald-400">'sunsai-super-2026'</span> });</div>
-                <div class="pl-4"><span class="text-blue-400">const</span> response = <span class="text-purple-400">await</span> studio.processQuery(<span class="text-emerald-400">"${title}"</span>);</div>
-                <div class="pl-4">console.log(response.output);</div>
-                <div>}</div>
-              </div>
+            <div class="content flex-1 space-y-3 relative group">
+              <div class="msg-text-content space-y-3">
+                <p>Here is a detailed breakdown and sample implementation for <strong>${title}</strong>:</p>
+                
+                <div class="bg-[#18181b] border border-gray-800 rounded-xl p-4 font-mono text-xs text-gray-300 space-y-1">
+                  <div class="text-gray-500">// Sample Configuration & Execution for ${title}</div>
+                  <div><span class="text-blue-400">import</span> { SunsaiStudio } <span class="text-blue-400">from</span> <span class="text-emerald-400">'@sunsai/ai-core'</span>;</div>
+                  <br>
+                  <div><span class="text-purple-400">async function</span> <span class="text-amber-300">executeWorkflow</span>() {</div>
+                  <div class="pl-4"><span class="text-blue-400">const</span> studio = <span class="text-purple-400">new</span> SunsaiStudio({ model: <span class="text-emerald-400">'sunsai-super-2026'</span> });</div>
+                  <div class="pl-4"><span class="text-blue-400">const</span> response = <span class="text-purple-400">await</span> studio.processQuery(<span class="text-emerald-400">"${title}"</span>);</div>
+                  <div class="pl-4">console.log(response.output);</div>
+                  <div>}</div>
+                </div>
 
-              <p class="text-xs text-gray-400">Session ID: <span class="font-mono text-gray-300">#CHAT-${id}0092</span> • Loaded from recent history backup.</p>
+                <p class="text-xs text-gray-400">Session ID: <span class="font-mono text-gray-300">#CHAT-${id}0092</span> • Loaded from recent history backup.</p>
+              </div>
+              
+              <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+                <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+                <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+                <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+              </div>
             </div>
           </div>
         `;
