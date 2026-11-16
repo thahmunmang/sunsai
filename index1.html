@@ -357,7 +357,7 @@
 
           <button id="send-btn" onclick="sendMessage()" class="hidden text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
         </div>
-        <div class="text-center text-xs text-gray-500 mt-2">Sunsai AI can make mistakes. Verify important info.</div>
+        <div class="text-center text-xs text-gray-500 mt-2">Sunsai1 AI can make mistakes. Verify important info.</div>
       </div>
     </div>
   </main>
@@ -1519,6 +1519,107 @@
     window.addEventListener('DOMContentLoaded', () => {
       renderRecentChats();
     });
+    // ==========================================
+    // MODAL API CONFIGURATION (Live Endpoint)
+    // ==========================================
+    const MODAL_API_BASE = "https://thahmunmang-sunsaitesting--sunsai-gemma4-vllm-serve.us-east.modal.run";
+
+    // // Multi-turn conversation memory array
+    // let conversationHistory = [];
+
+    // function toggleSidebar() {
+    //   document.getElementById('sidebar').classList.toggle('collapsed');
+    // }
+
+    // function newChat() {
+    //   conversationHistory = [];
+    //   document.getElementById('chat-stream').innerHTML = `
+    //     <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+    //       <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+    //       <div class="content flex-1">New chat session started. Ask me anything!</div>
+    //     </div>
+    //   `;
+    // }
+
+    function formatAiMarkdown(rawText) {
+      if (typeof marked !== 'undefined') {
+        return marked.parse(rawText);
+      }
+      return rawText.replace(/\n/g, '<br>');
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      if (!input || !input.value.trim()) return;
+
+      const userText = input.value.trim();
+      input.value = '';
+
+      const stream = document.getElementById('chat-stream');
+      if (!stream) return;
+
+      // 1. Append User Message Bubble
+      const userMsg = document.createElement('div');
+      userMsg.className = 'flex gap-3 text-sm text-white justify-end';
+      userMsg.innerHTML = `
+        <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl">
+          <div class="whitespace-pre-wrap">${userText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        </div>
+      `;
+      stream.appendChild(userMsg);
+      conversationHistory.push({ role: 'user', content: userText });
+
+      // 2. Append AI Thinking Placeholder
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed';
+      aiMsg.innerHTML = `
+        <i class="fa-solid fa-sparkles text-blue-400 mt-1 animate-pulse"></i>
+        <div class="content flex-1 text-gray-400 italic">Sunsai AI is generating response on Modal GPU... (First request may take up to 60s for cold start)</div>
+      `;
+      stream.appendChild(aiMsg);
+      stream.scrollTop = stream.scrollHeight;
+
+      // 3. Call Modal GPU Endpoint
+      try {
+        const response = await fetch(`${MODAL_API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: conversationHistory,
+            language: "hakha",
+            model_tier: "Sunsai Auto"
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error (${response.status})`);
+        }
+
+        const data = await response.json();
+        const aiReply = data.reply || 'Lehnak a chuak kho lo.';
+
+        // Save assistant reply to multi-turn history
+        conversationHistory.push({ role: 'assistant', content: aiReply });
+
+        // 4. Render Markdown & Syntax Highlighting
+        aiMsg.innerHTML = `
+          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+          <div class="content flex-1 space-y-2">
+            <div class="prose prose-invert max-w-none space-y-2">${formatAiMarkdown(aiReply)}</div>
+          </div>
+        `;
+
+        if (typeof hljs !== 'undefined') {
+          aiMsg.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
+        }
+      } catch (err) {
+        aiMsg.innerHTML = `
+          <i class="fa-solid fa-triangle-exclamation text-rose-400 mt-1"></i>
+          <div class="content flex-1 text-rose-400">Connection error with Modal backend: ${err.message}</div>
+        `;
+      }
+      stream.scrollTop = stream.scrollHeight;
+    }
   </script>
 </body>
 </html>
