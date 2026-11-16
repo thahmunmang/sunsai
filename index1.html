@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sunsai AI Studio</title>
+  <title>Sunsai AI Studio`</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
@@ -1388,46 +1388,46 @@
       showToast('AI response updated successfully');
     }
 
-    function sendMessage() {
-      const input = document.getElementById('user-input');
-      if (!input || !input.value.trim()) return;
+    // function sendMessage() {
+    //   const input = document.getElementById('user-input');
+    //   if (!input || !input.value.trim()) return;
 
-      const stream = document.getElementById('chat-stream');
-      if (stream) {
-        const userMsg = document.createElement('div');
-        userMsg.className = 'flex gap-3 text-sm text-white justify-end user-message-row';
-        userMsg.innerHTML = `
-          <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group user-bubble">
-            <div class="msg-text-content">${input.value}</div>
-            <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
-              <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
-            </div>
-          </div>
-        `;
-        stream.appendChild(userMsg);
+    //   const stream = document.getElementById('chat-stream');
+    //   if (stream) {
+    //     const userMsg = document.createElement('div');
+    //     userMsg.className = 'flex gap-3 text-sm text-white justify-end user-message-row';
+    //     userMsg.innerHTML = `
+    //       <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl relative group user-bubble">
+    //         <div class="msg-text-content">${input.value}</div>
+    //         <div class="absolute -left-20 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1.5 bg-[#18181b] border border-gray-800 p-1 rounded-lg shadow-lg">
+    //           <button onclick="editUserQuery(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Edit query"><i class="fa-solid fa-pen text-xs"></i></button>
+    //           <button onclick="copyMessageContent(this)" class="text-gray-400 hover:text-white p-1 rounded transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+    //         </div>
+    //       </div>
+    //     `;
+    //     stream.appendChild(userMsg);
 
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed ai-message-row';
-        aiMsg.innerHTML = `
-          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-          <div class="content flex-1 space-y-2 relative group">
-            <div class="msg-text-content">Thank you for your message. Processing request...</div>
-            <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
-              <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
-              <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
-              <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
-            </div>
-          </div>
-        `;
-        stream.appendChild(aiMsg);
+    //     const aiMsg = document.createElement('div');
+    //     aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed ai-message-row';
+    //     aiMsg.innerHTML = `
+    //       <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+    //       <div class="content flex-1 space-y-2 relative group">
+    //         <div class="msg-text-content">Thank you for your message. Processing request...</div>
+    //         <div class="flex items-center gap-2 pt-1 text-gray-400 text-xs">
+    //           <button onclick="handleThumbUp(this)" class="hover:text-blue-400 p-1 transition" title="Thumb Up"><i class="fa-regular fa-thumbs-up"></i></button>
+    //           <button onclick="handleThumbDown(this)" class="hover:text-rose-400 p-1 transition relative" title="Thumb Down"><i class="fa-regular fa-thumbs-down"></i></button>
+    //           <button onclick="editAiResponse(this)" class="hover:text-white p-1 transition" title="Edit response"><i class="fa-solid fa-pen text-xs"></i></button>
+    //           <button onclick="copyMessageContent(this)" class="hover:text-white p-1 transition" title="Copy text"><i class="fa-regular fa-copy text-xs"></i></button>
+    //         </div>
+    //       </div>
+    //     `;
+    //     stream.appendChild(aiMsg);
 
-        stream.scrollTop = stream.scrollHeight;
-      }
-      input.value = '';
-      handleInputChange();
-    }
+    //     stream.scrollTop = stream.scrollHeight;
+    //   }
+    //   input.value = '';
+    //   handleInputChange();
+    // }
 
     function loadChatHistory(id, title) {
       switchNav('Chat');
@@ -1527,19 +1527,19 @@
     // // Multi-turn conversation memory array
     // let conversationHistory = [];
 
-    // function toggleSidebar() {
-    //   document.getElementById('sidebar').classList.toggle('collapsed');
-    // }
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
 
-    // function newChat() {
-    //   conversationHistory = [];
-    //   document.getElementById('chat-stream').innerHTML = `
-    //     <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
-    //       <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-    //       <div class="content flex-1">New chat session started. Ask me anything!</div>
-    //     </div>
-    //   `;
-    // }
+    function newChat() {
+      conversationHistory = [];
+      document.getElementById('chat-stream').innerHTML = `
+        <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
+          <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
+          <div class="content flex-1">New chat session started. Ask me anything!</div>
+        </div>
+      `;
+    }
 
     function formatAiMarkdown(rawText) {
       if (typeof marked !== 'undefined') {
