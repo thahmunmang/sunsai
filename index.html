@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sunsai AI Studio</title>
+  <title>Sunsai AI Studio - Modal Connected</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
@@ -12,50 +12,69 @@
   <style>
     body { background-color: #0e0e10; color: #e3e3e3; font-family: 'Segoe UI', sans-serif; user-select: none; }
     .sidebar { background-color: #131314; width: 260px; transition: width 0.3s ease; }
+    .sidebar.collapsed { width: 64px; padding: 12px 6px !important; }
+    .sidebar.collapsed .hide-on-collapse { display: none !important; }
+    .sidebar.collapsed .show-on-collapse { display: flex !important; }
+    .show-on-collapse { display: none; }
     .input-box { background-color: #1e1f20; border-radius: 28px; }
+    pre code { border-radius: 8px; font-family: 'Consolas', monospace; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2b2d; border-radius: 4px; }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden relative">
 
   <!-- Sidebar -->
-  <aside class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
-    <div class="flex flex-col h-full">
-      <div class="flex items-center gap-2.5 px-1.5 py-1 mb-2">
-        <div class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/30">S</div>
-        <span class="font-bold text-base text-white">Sunsai AI Studio</span>
+  <aside id="sidebar" class="sidebar flex flex-col justify-between p-3 border-r border-gray-800 z-20">
+    <div class="flex flex-col h-full overflow-hidden">
+      <div class="flex items-center justify-between px-1.5 py-1 mb-2 hide-on-collapse">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 font-bold flex items-center justify-center text-sm border border-blue-500/30">S</div>
+          <span class="font-bold text-base text-white">Sunsai</span>
+        </div>
+        <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#1e1f20] transition"><i class="fa-solid fa-bars text-sm"></i></button>
       </div>
       <button onclick="newChat()" class="my-1.5 flex items-center gap-3 w-full bg-[#1a1a1c] hover:bg-[#28292a] text-gray-300 px-3 py-2.5 rounded-full text-sm font-medium transition">
-        <i class="fa-solid fa-plus w-5 text-center"></i> <span>New chat</span>
+        <i class="fa-solid fa-plus w-5 text-center text-sm"></i> <span class="hide-on-collapse">New chat</span>
       </button>
+    </div>
+    <div class="border-t border-gray-800 pt-2 text-sm text-gray-300 flex items-center gap-3 px-3 py-2">
+      <i class="fa-solid fa-user-circle text-blue-400 text-2xl"></i>
+      <span class="hide-on-collapse font-medium text-white">Sunsai User</span>
     </div>
   </aside>
 
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col justify-between h-full relative overflow-hidden">
-    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12">
+    <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full pt-12 select-text">
       <div class="flex gap-3 text-sm text-gray-200 leading-relaxed">
         <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
-        <div class="content flex-1">Hello! I am Sunsai AI connected to your Modal GPU backend. How can I help you today?</div>
+        <div class="content flex-1">Hello! I am Sunsai AI connected to your Modal GPU backend (`sunsai-gemma4-vllm`). How can I help you build or create today?</div>
       </div>
     </div>
 
-    <!-- Input Box -->
+    <!-- Input Section -->
     <div class="p-4 max-w-4xl mx-auto w-full">
       <div class="input-box flex items-center px-4 py-3 gap-3 border border-gray-700/50 relative">
-        <input id="user-input" type="text" placeholder="Ask Sunsai AI..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm" onkeydown="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()" class="text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
+        <input id="user-input" type="text" placeholder="Ask Sunsai AI..." class="bg-transparent flex-1 focus:outline-none text-white placeholder-gray-500 text-sm select-text" onkeydown="if(event.key==='Enter') sendMessage()">
+        <button id="send-btn" onclick="sendMessage()" class="text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-paper-plane text-base"></i></button>
       </div>
-      <div class="text-center text-xs text-gray-500 mt-2">Hosted on GitHub Pages &bull; Powered by Modal GPU</div>
+      <div class="text-center text-xs text-gray-500 mt-2">Connected to Modal GPU (us-east) &bull; Verify important info.</div>
     </div>
   </main>
 
   <script>
     // ==========================================
-    // LIVE MODAL BACKEND URL (No trailing slash!)
+    // MODAL API CONFIGURATION (Live Endpoint)
     // ==========================================
-    const MODAL_API_BASE = "https://thahmunmang--sunsai-gemma4-vllm-serve.modal.run";
+    const MODAL_API_BASE = "https://thahmunmang--sunsai-gemma4-vllm-serve.us-east.modal.run";
 
+    // Multi-turn conversation memory array
     let conversationHistory = [];
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
 
     function newChat() {
       conversationHistory = [];
@@ -65,6 +84,13 @@
           <div class="content flex-1">New chat session started. Ask me anything!</div>
         </div>
       `;
+    }
+
+    function formatAiMarkdown(rawText) {
+      if (typeof marked !== 'undefined') {
+        return marked.parse(rawText);
+      }
+      return rawText.replace(/\n/g, '<br>');
     }
 
     async function sendMessage() {
@@ -77,28 +103,28 @@
       const stream = document.getElementById('chat-stream');
       if (!stream) return;
 
-      // 1. Append User Bubble
+      // 1. Append User Message Bubble
       const userMsg = document.createElement('div');
       userMsg.className = 'flex gap-3 text-sm text-white justify-end';
       userMsg.innerHTML = `
         <div class="bg-blue-600 px-4 py-2.5 rounded-2xl max-w-xl">
-          <div>${userText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <div class="whitespace-pre-wrap">${userText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
       `;
       stream.appendChild(userMsg);
       conversationHistory.push({ role: 'user', content: userText });
 
-      // 2. Append AI Loading State
+      // 2. Append AI Thinking Placeholder
       const aiMsg = document.createElement('div');
       aiMsg.className = 'flex gap-3 text-sm text-gray-200 leading-relaxed';
       aiMsg.innerHTML = `
         <i class="fa-solid fa-sparkles text-blue-400 mt-1 animate-pulse"></i>
-        <div class="content flex-1 text-gray-400 italic">Sunsai AI is generating response on Modal GPU...</div>
+        <div class="content flex-1 text-gray-400 italic">Sunsai AI is generating response on Modal GPU... (First request may take up to 60s for cold start)</div>
       `;
       stream.appendChild(aiMsg);
       stream.scrollTop = stream.scrollHeight;
 
-      // 3. Send Asynchronous Fetch to Modal
+      // 3. Call Modal GPU Endpoint
       try {
         const response = await fetch(`${MODAL_API_BASE}/api/chat`, {
           method: 'POST',
@@ -110,17 +136,21 @@
           })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Server error (${response.status})`);
+        }
 
         const data = await response.json();
         const aiReply = data.reply || 'Lehnak a chuak kho lo.';
+
+        // Save assistant reply to multi-turn history
         conversationHistory.push({ role: 'assistant', content: aiReply });
 
-        // 4. Render Markdown Response
+        // 4. Render Markdown & Syntax Highlighting
         aiMsg.innerHTML = `
           <i class="fa-solid fa-sparkles text-blue-400 mt-1"></i>
           <div class="content flex-1 space-y-2">
-            <div class="prose prose-invert max-w-none">${marked.parse(aiReply)}</div>
+            <div class="prose prose-invert max-w-none space-y-2">${formatAiMarkdown(aiReply)}</div>
           </div>
         `;
 
